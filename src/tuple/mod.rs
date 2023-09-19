@@ -1,9 +1,10 @@
 use derive_more::{
     Add, AddAssign, Constructor, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
+use nalgebra::Point4;
 use std::ops::{Add, Mul, Sub};
 
-const EPSILON: f32 = 0.00001;
+pub const EPSILON: f32 = 0.00001;
 
 pub fn approx_eq(a: f32, b: f32) -> bool {
     (a - b).abs() < EPSILON
@@ -110,6 +111,18 @@ impl Eq for Point {}
 impl PartialEq for Point {
     fn eq(&self, other: &Self) -> bool {
         approx_eq(self.x, other.x) && approx_eq(self.y, other.y) && approx_eq(self.z, other.z)
+    }
+}
+
+impl From<Point> for nalgebra::Point4<f32> {
+    fn from(val: Point) -> Self {
+        Self::new(val.x, val.y, val.z, 1.0)
+    }
+}
+
+impl From<nalgebra::Point4<f32>> for Point {
+    fn from(value: Point4<f32>) -> Self {
+        Self::new(value.x, value.y, value.z)
     }
 }
 

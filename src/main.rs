@@ -4,6 +4,7 @@ use std::io;
 use std::io::{BufWriter, Write};
 
 mod canvas;
+mod matrix;
 mod tuple;
 
 struct Environment {
