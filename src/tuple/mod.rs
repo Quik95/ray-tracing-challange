@@ -1,7 +1,13 @@
 use derive_more::{
     Add, AddAssign, Constructor, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Sub};
+
+const EPSILON: f32 = 0.00001;
+
+pub fn approx_eq(a: f32, b: f32) -> bool {
+    (a - b).abs() < EPSILON
+}
 
 #[derive(
     Add,
@@ -17,7 +23,6 @@ use std::ops::{Add, Sub};
     Debug,
     Copy,
     Clone,
-    PartialEq,
 )]
 pub struct Vector {
     pub x: f32,
@@ -55,6 +60,14 @@ impl Vector {
     }
 }
 
+impl Eq for Vector {}
+
+impl PartialEq for Vector {
+    fn eq(&self, other: &Self) -> bool {
+        approx_eq(self.x, other.x) && approx_eq(self.y, other.y) && approx_eq(self.z, other.z)
+    }
+}
+
 impl Add<Point> for Vector {
     type Output = Point;
 
@@ -85,12 +98,19 @@ impl Sub<Point> for Vector {
     Debug,
     Copy,
     Clone,
-    PartialEq,
 )]
 pub struct Point {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+}
+
+impl Eq for Point {}
+
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        approx_eq(self.x, other.x) && approx_eq(self.y, other.y) && approx_eq(self.z, other.z)
+    }
 }
 
 impl Add<Vector> for Point {
@@ -109,9 +129,39 @@ impl Sub<Vector> for Point {
     }
 }
 
+#[derive(
+    Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Constructor, Debug, Copy, Clone,
+)]
+pub struct Color {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+}
+
+impl Color {
+    pub fn hadamard_product(&self, other: &Self) -> Self {
+        Self::new(self.r * other.r, self.g * other.g, self.b * other.b)
+    }
+}
+
+impl Eq for Color {}
+impl PartialEq for Color {
+    fn eq(&self, other: &Self) -> bool {
+        approx_eq(self.r, other.r) && approx_eq(self.g, other.g) && approx_eq(self.b, other.b)
+    }
+}
+
+impl Mul<Self> for Color {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.hadamard_product(&rhs)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::tuple::{Point, Vector};
+    use crate::tuple::{approx_eq, Color, Point, Vector};
     use test_case::test_case;
 
     #[test]
@@ -197,22 +247,22 @@ mod tests {
         assert_eq!(res, Point::new(0.5, -1., 1.5));
     }
 
-    #[test_case(Vector::new(1., 0., 0.), 1.0 ; "when input is (1., 0., 0.)")]
-    #[test_case(Vector::new(0., 1., 0.), 1.0 ; "when input is (0., 1., 0.)")]
-    #[test_case(Vector::new(0., 0., 1.), 1.0 ; "when input is (0., 0., 1.)")]
-    #[test_case(Vector::new(1., 2., 3.), f32::sqrt(14.0) ; "when input is (1., 2., 3.)")]
-    #[test_case(Vector::new(-1., -2., -3.), f32::sqrt(14.0) ; "when input is neg((1., 2., 3.))")]
+    #[test_case(Vector::new(1., 0., 0.), 1.0; "when input is (1., 0., 0.)")]
+    #[test_case(Vector::new(0., 1., 0.), 1.0; "when input is (0., 1., 0.)")]
+    #[test_case(Vector::new(0., 0., 1.), 1.0; "when input is (0., 0., 1.)")]
+    #[test_case(Vector::new(1., 2., 3.), f32::sqrt(14.0); "when input is (1., 2., 3.)")]
+    #[test_case(Vector::new(- 1., - 2., - 3.), f32::sqrt(14.0); "when input is neg((1., 2., 3.))")]
     pub fn vector_magnitude(input: Vector, expected: f32) {
         let magnitude = input.magnitude();
         assert_eq!(magnitude, expected);
     }
 
-    #[test_case(Vector::new(4., 0., 0.), Vector::new(1., 0., 0.) ; "when input is (4., 0., 0.)")]
+    #[test_case(Vector::new(4., 0., 0.), Vector::new(1., 0., 0.); "when input is (4., 0., 0.)")]
     #[test_case(Vector::new(1., 2., 3.), Vector::new(
-        1.0/14.0_f32.sqrt(),
-        2.0/14.0_f32.sqrt(),
-        3.0/14.0_f32.sqrt(),
-    ) ; "when input is (1., 2., 3.)")]
+    1.0 / 14.0_f32.sqrt(),
+    2.0 / 14.0_f32.sqrt(),
+    3.0 / 14.0_f32.sqrt(),
+    ); "when input is (1., 2., 3.)")]
     pub fn normalize_vector(input: Vector, expected: Vector) {
         let normalized = input.normalize();
         assert_eq!(normalized, expected);
@@ -221,7 +271,7 @@ mod tests {
     #[test]
     pub fn magnitude_of_normalized_vector_is_one() {
         let mag = Vector::new(1., 2., 3.).normalize().magnitude();
-        assert_eq!(mag, 1.0);
+        assert!(approx_eq(mag, 1.));
     }
 
     #[test]
@@ -238,5 +288,32 @@ mod tests {
         let b = Vector::new(2., 3., 4.);
         assert_eq!(a.cross(&b), Vector::new(-1., 2., -1.));
         assert_eq!(b.cross(&a), Vector::new(1., -2., 1.));
+    }
+
+    #[test]
+    pub fn adding_colors() {
+        let a = Color::new(0.9, 0.6, 0.75);
+        let b = Color::new(0.7, 0.1, 0.25);
+        assert_eq!(a + b, Color::new(1.6, 0.7, 1.0));
+    }
+
+    #[test]
+    pub fn subtracting_colors() {
+        let a = Color::new(0.9, 0.6, 0.75);
+        let b = Color::new(0.7, 0.1, 0.25);
+        assert_eq!(a - b, Color::new(0.2, 0.5, 0.5));
+    }
+
+    #[test]
+    pub fn multiplying_color_by_scalar() {
+        let a = Color::new(0.2, 0.3, 0.4);
+        assert_eq!(a * 2., Color::new(0.4, 0.6, 0.8));
+    }
+
+    #[test]
+    pub fn multiplying_colors() {
+        let a = Color::new(1., 0.2, 0.4);
+        let b = Color::new(0.9, 1., 0.1);
+        assert_eq!(a * b, Color::new(0.9, 0.2, 0.04));
     }
 }
