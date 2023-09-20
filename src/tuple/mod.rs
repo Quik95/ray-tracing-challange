@@ -61,6 +61,22 @@ impl Vector {
     }
 }
 
+impl From<nalgebra::Vector4<f32>> for Vector {
+    fn from(value: nalgebra::Vector4<f32>) -> Self {
+        Self {
+            x: value.x,
+            y: value.y,
+            z: value.z,
+        }
+    }
+}
+
+impl From<Vector> for nalgebra::Vector4<f32> {
+    fn from(val: Vector) -> Self {
+        Self::new(val.x, val.y, val.z, 0.)
+    }
+}
+
 impl Eq for Vector {}
 
 impl PartialEq for Vector {
@@ -104,6 +120,16 @@ pub struct Point {
     pub x: f32,
     pub y: f32,
     pub z: f32,
+}
+
+impl Point {
+    pub const fn zero() -> Self {
+        Self {
+            x: 0.,
+            y: 0.,
+            z: 0.,
+        }
+    }
 }
 
 impl Eq for Point {}

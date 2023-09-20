@@ -1,4 +1,4 @@
-use crate::tuple::Color;
+use crate::tuple::{Color, Point};
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 
@@ -6,6 +6,7 @@ pub struct Canvas {
     pub width: u32,
     pub height: u32,
     pub pixels: Vec<Color>,
+    pub center_point: Point,
 }
 
 impl Canvas {
@@ -15,6 +16,7 @@ impl Canvas {
             width,
             height,
             pixels,
+            center_point: Point::new(width as f32 / 2., height as f32 / 2., 0.),
         }
     }
 
@@ -35,6 +37,18 @@ impl Canvas {
     pub fn pixel_at(&self, x: u32, y: u32) -> Result<Color> {
         let index = self.index_at(x, y)?;
         Ok(self.pixels[index])
+    }
+
+    pub fn draw_circle(&mut self, x: i32, y: i32, radius: i32) -> Result<()> {
+        for i in x - radius..x + radius {
+            for j in y - radius..y + radius {
+                if (i - x).pow(2) + (j - y).pow(2) <= radius.pow(2) {
+                    self.write_pixel(i as u32, j as u32, Color::new(1., 1., 1.))?;
+                }
+            }
+        }
+
+        Ok(())
     }
 
     pub fn convert_to_ppm(&self) -> String {

@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 color-eyre = "0.6.2"
 derive_more = "0.99.17"
+lazy_static = { version = "1.4.0", features = [] }
 nalgebra = "0.32.3"
 
 [dev-dependencies]
