@@ -3,10 +3,14 @@ mod sphere;
 use crate::ray::Ray;
 use derive_more::Constructor;
 
+use crate::material::Material;
+use crate::tuple::{Point, Vector};
 pub use sphere::Sphere;
 
 pub trait Hittable {
     fn intersect(&'static self, ray: &Ray) -> Option<Intersection>;
+    fn get_normal(&self, point: &Point) -> Vector;
+    fn get_material(&self) -> &Material;
 }
 
 #[derive(Constructor)]

@@ -24,6 +24,7 @@ pub fn approx_eq(a: f32, b: f32) -> bool {
     Debug,
     Copy,
     Clone,
+    Default,
 )]
 pub struct Vector {
     pub x: f32,
@@ -33,7 +34,7 @@ pub struct Vector {
 
 impl Vector {
     pub fn zero() -> Self {
-        Self::new(0., 0., 0.)
+        Self::default()
     }
     pub fn magnitude(&self) -> f32 {
         f32::sqrt(
@@ -58,6 +59,10 @@ impl Vector {
             self.z.mul_add(other.x, -self.x * other.z),
             self.x.mul_add(other.y, -self.y * other.x),
         )
+    }
+
+    pub fn reflect(&self, normal: &Self) -> Self {
+        *self - *normal * 2. * self.dot(normal)
     }
 }
 
@@ -101,7 +106,7 @@ impl Sub<Point> for Vector {
     }
 }
 
-#[derive(Neg, Mul, MulAssign, Div, DivAssign, Debug, Copy, Clone)]
+#[derive(Neg, Mul, MulAssign, Div, DivAssign, Debug, Copy, Clone, Default)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -175,7 +180,19 @@ impl Sub<Vector> for Point {
 }
 
 #[derive(
-    Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Constructor, Debug, Copy, Clone,
+    Add,
+    AddAssign,
+    Sub,
+    SubAssign,
+    Mul,
+    MulAssign,
+    Div,
+    DivAssign,
+    Constructor,
+    Debug,
+    Copy,
+    Clone,
+    Default,
 )]
 pub struct Color {
     pub r: f32,
@@ -360,5 +377,21 @@ mod tests {
         let a = Color::new(1., 0.2, 0.4);
         let b = Color::new(0.9, 1., 0.1);
         assert_eq!(a * b, Color::new(0.9, 0.2, 0.04));
+    }
+
+    #[test]
+    pub fn reflect_at_45_degree() {
+        let v = Vector::new(1., -1., 0.);
+        let n = Vector::new(0., 1., 0.);
+        let r = v.reflect(&n);
+        assert_eq!(r, Vector::new(1., 1., 0.));
+    }
+
+    #[test]
+    pub fn reflect_off_slanted_surface() {
+        let v = Vector::new(0., -1., 0.);
+        let n = Vector::new(2_f32.sqrt() / 2., 2_f32.sqrt() / 2., 0.);
+        let r = v.reflect(&n);
+        assert_eq!(r, Vector::new(1., 0., 0.));
     }
 }

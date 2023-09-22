@@ -1,19 +1,29 @@
+use crate::material::Material;
+use uuid::Uuid;
+
 use crate::matrix::Matrix4;
 use crate::objects::{Hittable, Intersection};
 use crate::ray::Ray;
-use crate::tuple::Point;
+use crate::tuple::{Point, Vector};
 
-use uuid::Uuid;
-
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone)]
 pub struct Sphere {
     pub id: Uuid,
     pub transform: Matrix4,
+    pub material: Material,
 }
 
 impl Sphere {
     pub fn static_default() -> &'static mut Self {
         let s = Box::<Sphere>::default();
+        let leaked = Box::leak(s);
+        leaked
+    }
+
+    pub fn default_with_material(material: Material) -> &'static mut Self {
+        let mut s = Box::<Sphere>::default();
+        s.material = material;
+
         let leaked = Box::leak(s);
         leaked
     }
@@ -29,6 +39,7 @@ impl Default for Sphere {
         Self {
             id: Uuid::new_v4(),
             transform: Matrix4::identity(),
+            material: Material::default(),
         }
     }
 }
@@ -54,10 +65,24 @@ impl Hittable for Sphere {
 
         Some(Intersection::new(vec![t1, t2], self))
     }
+
+    fn get_normal(&self, point: &Point) -> Vector {
+        let object_point = self.transform.inverse() * *point;
+        let object_normal = (object_point - Point::zero()).normalize();
+        let world_normal = self.transform.inverse().transpose() * object_normal;
+
+        world_normal.normalize()
+    }
+
+    fn get_material(&self) -> &Material {
+        &self.material
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use test_case::test_case;
+
     use crate::matrix::Matrix4;
     use crate::objects::{Hittable, Sphere};
     use crate::ray::Ray;
@@ -140,11 +165,59 @@ mod tests {
         assert_eq!(intersects.roots[1], 7.);
     }
 
+    #[test]
     pub fn intersect_translated_ray_with_sphere() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
             .transform(&Matrix4::identity().translate(&Vector::new(5., 0., 0.)));
         let intersects = s.intersect(&r);
         assert!(intersects.is_none());
+    }
+
+    #[test_case(Point::new(1., 0., 0.), Vector::new(1., 0., 0.); "on x axis")]
+    #[test_case(Point::new(0., 1., 0.), Vector::new(0., 1., 0.); "on y axis")]
+    #[test_case(Point::new(0., 0., 1.), Vector::new(0., 0., 1.); "on z axis")]
+    pub fn normal_at_point(p: Point, expected: Vector) {
+        let s = Sphere::default();
+        let n = s.get_normal(&p);
+        assert_eq!(n, expected);
+    }
+
+    #[test]
+    pub fn normal_at_nonaxial_point() {
+        let s = Sphere::default();
+        let p = Point::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.);
+        let n = s.get_normal(&p);
+        assert_eq!(
+            n,
+            Vector::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.)
+        );
+    }
+
+    #[test]
+    pub fn normal_is_normalized_vector() {
+        let s = Sphere::default();
+        let p = Point::new(3_f32.sqrt() / 3., 3_f32.sqrt() / 3., 3_f32.sqrt() / 3.);
+        let n = s.get_normal(&p);
+        assert_eq!(n, n.normalize());
+    }
+
+    #[test]
+    pub fn normal_of_translated_sphere() {
+        let s = Sphere::static_default()
+            .transform(&Matrix4::identity().translate(&Vector::new(0., 1., 0.)));
+        let n = s.get_normal(&Point::new(0., 1.70711, -0.70711));
+        assert_eq!(n, Vector::new(0., 0.70711, -0.70711));
+    }
+
+    #[test]
+    pub fn normal_of_transformed_sphere() {
+        let s = Sphere::static_default().transform(
+            &Matrix4::identity()
+                .rotate_z(std::f32::consts::PI / 5.)
+                .scale(&Vector::new(1., 0.5, 1.)),
+        );
+        let n = s.get_normal(&Point::new(0., 2_f32.sqrt() / 2., -(2_f32.sqrt()) / 2.));
+        assert_eq!(n, Vector::new(0., 0.97014, -0.24254));
     }
 }

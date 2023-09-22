@@ -72,7 +72,7 @@ impl Matrix4 {
         Self(nalgebra::Matrix4::identity())
     }
 
-    pub fn translate(&self, translation: &Vector) -> Self {
+    pub fn translate(self, translation: &Vector) -> Self {
         let t = nalgebra::Matrix4::new_translation(&nalgebra::Vector3::new(
             translation.x,
             translation.y,
@@ -81,48 +81,48 @@ impl Matrix4 {
         Self(t * self.0)
     }
 
-    pub fn scale(&self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: &Vector) -> Self {
         let t = nalgebra::Matrix4::new_nonuniform_scaling(&nalgebra::Vector3::new(
             scale.x, scale.y, scale.z,
         ));
         Self(t * self.0)
     }
 
-    fn rotate(&self, axis: &nalgebra::Unit<nalgebra::Vector3<f32>>, angle: f32) -> Self {
+    fn rotate(self, axis: &nalgebra::Unit<nalgebra::Vector3<f32>>, angle: f32) -> Self {
         let t = nalgebra::Matrix4::from_axis_angle(axis, angle);
         Self(t * self.0)
     }
 
-    pub fn rotate_x(&self, angle: f32) -> Self {
+    pub fn rotate_x(self, angle: f32) -> Self {
         self.rotate(
             &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(1., 0., 0.)),
             angle,
         )
     }
 
-    pub fn rotate_y(&self, angle: f32) -> Self {
+    pub fn rotate_y(self, angle: f32) -> Self {
         self.rotate(
             &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.)),
             angle,
         )
     }
 
-    pub fn rotate_z(&self, angle: f32) -> Self {
+    pub fn rotate_z(self, angle: f32) -> Self {
         self.rotate(
             &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 0., 1.)),
             angle,
         )
     }
 
-    pub fn transpose(&self) -> Self {
+    pub fn transpose(self) -> Self {
         Self(self.0.transpose())
     }
 
-    pub fn inverse(&self) -> Self {
+    pub fn inverse(self) -> Self {
         Self(self.0.try_inverse().unwrap())
     }
 
-    pub fn shear(&self, xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
+    pub fn shear(self, xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
         Self(
             matrix![
                 1., xy, xz, 0.;
@@ -135,38 +135,38 @@ impl Matrix4 {
 }
 
 impl Vector {
-    pub fn scale(&self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: &Vector) -> Self {
         let t = Matrix4::identity().scale(scale);
-        t * *self
+        t * self
     }
 }
 
 impl Point {
-    pub fn translate(&self, translation: &Vector) -> Self {
+    pub fn translate(self, translation: &Vector) -> Self {
         let t = Matrix4::identity().translate(translation);
-        t * *self
+        t * self
     }
 
-    pub fn scale(&self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: &Vector) -> Self {
         let t = Matrix4::identity().scale(scale);
-        t * *self
+        t * self
     }
 
-    pub fn rotate_x(&self, angle: f32) -> Self {
-        Matrix4::identity().rotate_x(angle) * *self
+    pub fn rotate_x(self, angle: f32) -> Self {
+        Matrix4::identity().rotate_x(angle) * self
     }
 
-    pub fn rotate_y(&self, angle: f32) -> Self {
-        Matrix4::identity().rotate_y(angle) * *self
+    pub fn rotate_y(self, angle: f32) -> Self {
+        Matrix4::identity().rotate_y(angle) * self
     }
 
-    pub fn rotate_z(&self, angle: f32) -> Self {
-        Matrix4::identity().rotate_z(angle) * *self
+    pub fn rotate_z(self, angle: f32) -> Self {
+        Matrix4::identity().rotate_z(angle) * self
     }
 
-    pub fn shear(&self, xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
+    pub fn shear(self, xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
         let t = Matrix4::identity().shear(xy, xz, yx, yz, zx, zy);
-        t * *self
+        t * self
     }
 }
 
