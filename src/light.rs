@@ -21,7 +21,7 @@ impl PointLight {
 
         let effective_color = material.color * self.intensity;
         let ambient = effective_color * material.ambient;
-        let light_vector = (self.position - *pos).normalize();
+        let light_vector = (self.position - pos).normalize();
         let light_dot_normal = light_vector.dot(normal_vector);
         if light_dot_normal < 0. {
             diffuse = Color::new(0., 0., 0.);

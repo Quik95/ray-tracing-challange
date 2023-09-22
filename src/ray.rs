@@ -15,7 +15,7 @@ impl Ray {
     }
 
     pub fn transform(self, matrix: &matrix::Matrix4) -> Self {
-        Self::new(*matrix * self.origin, *matrix * self.direction)
+        Self::new(matrix * self.origin, matrix * self.direction)
     }
 }
 
