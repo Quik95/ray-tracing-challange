@@ -2,7 +2,7 @@ use crate::tuple::{Point, Vector};
 use lazy_static::lazy_static;
 use nalgebra::{matrix, Point4, Vector4};
 
-type Matrix4 = nalgebra::Matrix4<f32>;
+pub type Matrix4 = nalgebra::Matrix4<f32>;
 type Matrix3 = nalgebra::Matrix3<f32>;
 type Matrix2 = nalgebra::Matrix2<f32>;
 
@@ -13,6 +13,15 @@ lazy_static! {
         nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.));
     pub static ref AXIS_Z: nalgebra::Unit<nalgebra::Vector3<f32>> =
         nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 0., 1.));
+}
+
+pub fn new_shear(xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Matrix4 {
+    matrix![
+        1., xy, xz, 0.;
+        yx, 1., yz, 0.;
+        zx, zy, 1., 0.;
+        0., 0., 0., 1.
+    ]
 }
 
 impl Point {
@@ -62,12 +71,7 @@ impl Point {
 
     pub fn shear(&self, xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
         let p: Point4<f32> = (*self).into();
-        let t = matrix![
-            1., xy, xz, 0.;
-            yx, 1., yz, 0.;
-            zx, zy, 1., 0.;
-            0., 0., 0., 1.
-        ];
+        let t = new_shear(xy, xz, yx, yz, zx, zy);
         (t * p).into()
     }
 }

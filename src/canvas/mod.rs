@@ -20,7 +20,9 @@ impl Canvas {
         }
     }
 
-    fn index_at(&self, x: u32, y: u32) -> Result<usize> {
+    fn index_at(&self, x: i32, y: i32) -> Result<usize> {
+        let x = (x + self.center_point.x as i32) as u32;
+        let y = (-y + self.center_point.y as i32) as u32;
         if x >= self.width || y >= self.height {
             return Err(eyre!("Index out of bounds: ({}, {})", x, y));
         }
@@ -28,13 +30,13 @@ impl Canvas {
         Ok((y * self.width + x) as usize)
     }
 
-    pub fn write_pixel(&mut self, x: u32, y: u32, color: Color) -> Result<()> {
+    pub fn write_pixel(&mut self, x: i32, y: i32, color: Color) -> Result<()> {
         let index = self.index_at(x, y)?;
         self.pixels[index] = color;
         Ok(())
     }
 
-    pub fn pixel_at(&self, x: u32, y: u32) -> Result<Color> {
+    pub fn pixel_at(&self, x: i32, y: i32) -> Result<Color> {
         let index = self.index_at(x, y)?;
         Ok(self.pixels[index])
     }
@@ -43,7 +45,7 @@ impl Canvas {
         for i in x - radius..x + radius {
             for j in y - radius..y + radius {
                 if (i - x).pow(2) + (j - y).pow(2) <= radius.pow(2) {
-                    self.write_pixel(i as u32, j as u32, Color::new(1., 1., 1.))?;
+                    self.write_pixel(i, j, Color::new(1., 1., 1.))?;
                 }
             }
         }

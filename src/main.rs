@@ -1,10 +1,17 @@
 use crate::canvas::Canvas;
+use crate::matrix::{new_shear, Matrix4};
+use crate::objects::Hittable;
+use crate::ray::Ray;
 use crate::tuple::{Point, Vector};
+use nalgebra::vector;
+
 use std::io;
 use std::io::{BufWriter, Write};
 
 mod canvas;
 mod matrix;
+mod objects;
+mod ray;
 mod tuple;
 
 struct Environment {
@@ -27,23 +34,31 @@ fn tick(env: &Environment, proj: &Projectile) -> Projectile {
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
 
-    let mut canvas = Canvas::new(900, 550);
+    let canvas_pixels = 1000;
+    let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
+    let t = Matrix4::identity()
+        * new_shear(1., 0., 0., 0., 0., 0.)
+        * Matrix4::new_nonuniform_scaling(&vector![0.5, 1.0, 1.]);
+    let sphere = objects::Sphere::static_default().transform(&t);
 
-    let identity = Point::zero();
-    let mut rotation = 0.0_f32;
-    for _ in 0..12 {
-        let p = identity
-            .translate(&nalgebra::vector![0., canvas.center_point.y / 2.0, 0.])
-            .rotate_z(rotation);
+    let ray_origin = Point::new(0., 0., -5.);
+    let wall_z = 10.;
+    let wall_size = 7.0;
+    let pixel_size = wall_size / canvas_pixels as f32;
+    let half = pixel_size / 2.;
 
-        rotation += std::f32::consts::PI / 6.0;
-        canvas
-            .draw_circle(
-                p.x as i32 + canvas.center_point.x as i32,
-                -p.y as i32 + canvas.center_point.y as i32,
-                15,
-            )
-            .unwrap();
+    for y in (-canvas.center_point.y as i32)..(canvas.center_point.y as i32) {
+        let world_y = half - pixel_size * y as f32;
+        for x in (-canvas.center_point.x as i32)..(canvas.center_point.x as i32) {
+            let world_x = -half + pixel_size * x as f32;
+            let p = Point::new(world_x, world_y, wall_z);
+            let r = Ray::new(ray_origin, (p - ray_origin).normalize());
+            if let Some(_xs) = sphere.intersect(&r) {
+                canvas
+                    .write_pixel(x, y, tuple::Color::new(1., 0., 0.))
+                    .unwrap();
+            }
+        }
     }
 
     let ppm = canvas.convert_to_ppm();

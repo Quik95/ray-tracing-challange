@@ -1,3 +1,4 @@
+use crate::matrix::Matrix4;
 use derive_more::{
     Add, AddAssign, Constructor, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -59,6 +60,12 @@ impl Vector {
             self.x.mul_add(other.y, -self.y * other.x),
         )
     }
+
+    pub fn multiply_by_matrix(&self, M: &Matrix4) -> Self {
+        let p: nalgebra::Vector4<f32> = (*self).into();
+        let res = M * p;
+        Self::from(res)
+    }
 }
 
 impl From<nalgebra::Vector4<f32>> for Vector {
@@ -101,21 +108,7 @@ impl Sub<Point> for Vector {
     }
 }
 
-#[derive(
-    Add,
-    AddAssign,
-    Sub,
-    SubAssign,
-    Neg,
-    Mul,
-    MulAssign,
-    Div,
-    DivAssign,
-    Constructor,
-    Debug,
-    Copy,
-    Clone,
-)]
+#[derive(Neg, Mul, MulAssign, Div, DivAssign, Debug, Copy, Clone)]
 pub struct Point {
     pub x: f32,
     pub y: f32,
@@ -123,12 +116,38 @@ pub struct Point {
 }
 
 impl Point {
+    pub const fn new(x: f32, y: f32, z: f32) -> Self {
+        Self { x, y, z }
+    }
+
     pub const fn zero() -> Self {
         Self {
             x: 0.,
             y: 0.,
             z: 0.,
         }
+    }
+
+    pub fn multiply_by_matrix(&self, M: &Matrix4) -> Self {
+        let p: nalgebra::Point4<f32> = (*self).into();
+        let res = M * p;
+        Self::from(res)
+    }
+}
+
+impl Add for Point {
+    type Output = Vector;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Vector::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
+    }
+}
+
+impl Sub for Point {
+    type Output = Vector;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
@@ -232,7 +251,7 @@ mod tests {
         let p = Point::new(3., 2., 1.);
         let v = Point::new(5., 6., 7.);
         let res = p - v;
-        assert_eq!(res, Point::new(-2., -4., -6.));
+        assert_eq!(res, Vector::new(-2., -4., -6.));
     }
 
     #[test]
