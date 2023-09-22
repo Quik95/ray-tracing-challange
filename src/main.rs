@@ -1,9 +1,8 @@
 use crate::canvas::Canvas;
-use crate::matrix::{new_shear, Matrix4};
+use crate::matrix::Matrix4;
 use crate::objects::Hittable;
 use crate::ray::Ray;
 use crate::tuple::{Point, Vector};
-use nalgebra::vector;
 
 use std::io;
 use std::io::{BufWriter, Write};
@@ -14,31 +13,14 @@ mod objects;
 mod ray;
 mod tuple;
 
-struct Environment {
-    gravity: Vector,
-    wind: Vector,
-}
-
-#[derive(Debug)]
-struct Projectile {
-    position: Point,
-    velocity: Vector,
-}
-
-fn tick(env: &Environment, proj: &Projectile) -> Projectile {
-    let position = proj.position + proj.velocity;
-    let velocity = proj.velocity + env.gravity + env.wind;
-    Projectile { position, velocity }
-}
-
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
 
     let canvas_pixels = 1000;
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
     let t = Matrix4::identity()
-        * new_shear(1., 0., 0., 0., 0., 0.)
-        * Matrix4::new_nonuniform_scaling(&vector![0.5, 1.0, 1.]);
+        .shear(1., 0., 0., 0., 0., 0.)
+        .scale(&Vector::new(0.5, 1.0, 1.));
     let sphere = objects::Sphere::static_default().transform(&t);
 
     let ray_origin = Point::new(0., 0., -5.);

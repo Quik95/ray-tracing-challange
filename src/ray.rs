@@ -15,10 +15,7 @@ impl Ray {
     }
 
     pub fn transform(&self, matrix: &matrix::Matrix4) -> Self {
-        Self::new(
-            self.origin.multiply_by_matrix(matrix),
-            self.direction.multiply_by_matrix(matrix),
-        )
+        Self::new(*matrix * self.origin, *matrix * self.direction)
     }
 }
 
@@ -27,7 +24,6 @@ mod tests {
     use crate::matrix::Matrix4;
     use crate::ray::Ray;
     use crate::tuple::{Point, Vector};
-    use nalgebra::vector;
 
     #[test]
     pub fn creating_ray() {
@@ -53,7 +49,7 @@ mod tests {
     #[test]
     pub fn translating_ray() {
         let r = Ray::new(Point::new(1., 2., 3.), Vector::new(0., 1., 0.));
-        let t = Matrix4::new_translation(&vector![3., 4., 5.]);
+        let t = Matrix4::identity().translate(&Vector::new(3., 4., 5.));
         let r2 = r.transform(&t);
         assert_eq!(r2.origin, Point::new(4., 6., 8.));
         assert_eq!(r2.direction, Vector::new(0., 1., 0.));
@@ -62,7 +58,7 @@ mod tests {
     #[test]
     pub fn scaling_ray() {
         let r = Ray::new(Point::new(1., 2., 3.), Vector::new(0., 1., 0.));
-        let t = Matrix4::new_nonuniform_scaling(&vector![2., 3., 4.]);
+        let t = Matrix4::identity().scale(&Vector::new(2., 3., 4.));
         let r2 = r.transform(&t);
         assert_eq!(r2.origin, Point::new(2., 6., 12.));
         assert_eq!(r2.direction, Vector::new(0., 3., 0.));

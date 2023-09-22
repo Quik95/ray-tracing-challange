@@ -8,7 +8,7 @@ use uuid::Uuid;
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Sphere {
     pub id: Uuid,
-    pub transform: nalgebra::Matrix4<f32>,
+    pub transform: Matrix4,
 }
 
 impl Sphere {
@@ -37,7 +37,7 @@ impl Hittable for Sphere {
     fn intersect(&'static self, ray: &Ray) -> Option<Intersection> {
         let origin = Point::zero();
         let radius = 1.0;
-        let ray = ray.transform(&self.transform.try_inverse().unwrap());
+        let ray = ray.transform(&self.transform.inverse());
 
         let sphere_to_ray = ray.origin - origin;
         let a = ray.direction.dot(&ray.direction);
@@ -62,7 +62,6 @@ mod tests {
     use crate::objects::{Hittable, Sphere};
     use crate::ray::Ray;
     use crate::tuple::{Point, Vector};
-    use nalgebra::vector;
 
     #[test]
     pub fn ray_intersects_sphere_at_two_points() {
@@ -126,7 +125,7 @@ mod tests {
     #[test]
     pub fn changing_the_sphere_transform() {
         let s = Sphere::static_default();
-        let t = Matrix4::new_translation(&vector![2., 3., 4.]);
+        let t = Matrix4::identity().translate(&Vector::new(2., 3., 4.));
         let s2 = s.transform(&t);
         assert_eq!(s2.transform, t);
     }
@@ -135,7 +134,7 @@ mod tests {
     pub fn intersect_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
-            .transform(&Matrix4::new_nonuniform_scaling(&vector![2., 2., 2.]));
+            .transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
         let intersects = s.intersect(&r).unwrap();
         assert_eq!(intersects.roots[0], 3.);
         assert_eq!(intersects.roots[1], 7.);
@@ -143,7 +142,8 @@ mod tests {
 
     pub fn intersect_translated_ray_with_sphere() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
-        let s = Sphere::static_default().transform(&Matrix4::new_translation(&vector![5., 0., 0.]));
+        let s = Sphere::static_default()
+            .transform(&Matrix4::identity().translate(&Vector::new(5., 0., 0.)));
         let intersects = s.intersect(&r);
         assert!(intersects.is_none());
     }

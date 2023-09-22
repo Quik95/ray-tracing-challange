@@ -1,4 +1,3 @@
-use crate::matrix::Matrix4;
 use derive_more::{
     Add, AddAssign, Constructor, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
@@ -60,12 +59,6 @@ impl Vector {
             self.x.mul_add(other.y, -self.y * other.x),
         )
     }
-
-    pub fn multiply_by_matrix(&self, M: &Matrix4) -> Self {
-        let p: nalgebra::Vector4<f32> = (*self).into();
-        let res = M * p;
-        Self::from(res)
-    }
 }
 
 impl From<nalgebra::Vector4<f32>> for Vector {
@@ -126,12 +119,6 @@ impl Point {
             y: 0.,
             z: 0.,
         }
-    }
-
-    pub fn multiply_by_matrix(&self, M: &Matrix4) -> Self {
-        let p: nalgebra::Point4<f32> = (*self).into();
-        let res = M * p;
-        Self::from(res)
     }
 }
 
