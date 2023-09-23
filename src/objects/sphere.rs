@@ -13,6 +13,13 @@ pub struct Sphere {
     pub material: Material,
 }
 
+impl Eq for Sphere {}
+impl PartialEq for Sphere {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 impl Sphere {
     pub fn static_default() -> &'static mut Self {
         let s = Box::<Sphere>::default();
@@ -45,7 +52,7 @@ impl Default for Sphere {
 }
 
 impl Hittable for Sphere {
-    fn intersect(&'static self, ray: &Ray) -> Option<Intersection> {
+    fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
         let origin = Point::zero();
         let radius = 1.0;
         let ray = ray.transform(&self.transform.inverse());
@@ -63,7 +70,10 @@ impl Hittable for Sphere {
         let t1 = (-b - discriminant.sqrt()) / (2. * a);
         let t2 = (-b + discriminant.sqrt()) / (2. * a);
 
-        Some(Intersection::new(vec![t1, t2], self))
+        Some(vec![
+            Intersection::new(t1, self),
+            Intersection::new(t2, self),
+        ])
     }
 
     fn get_normal(&self, point: &Point) -> Vector {
@@ -76,6 +86,10 @@ impl Hittable for Sphere {
 
     fn get_material(&self) -> &Material {
         &self.material
+    }
+
+    fn get_id(&self) -> &Uuid {
+        &self.id
     }
 }
 
@@ -90,34 +104,25 @@ mod tests {
 
     #[test]
     pub fn ray_intersects_sphere_at_two_points() {
-        let r = Ray::new(
-            crate::tuple::Point::new(0., 0., -5.),
-            crate::tuple::Vector::new(0., 0., 1.),
-        );
+        let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default();
         let roots = s.intersect(&r).unwrap();
-        assert_eq!(roots.roots[0], 4.);
-        assert_eq!(roots.roots[1], 6.);
+        assert_eq!(roots[0].t, 4.);
+        assert_eq!(roots[1].t, 6.);
     }
 
     #[test]
     pub fn ray_intersects_sphere_at_one_point() {
-        let r = Ray::new(
-            crate::tuple::Point::new(0., 1., -5.),
-            crate::tuple::Vector::new(0., 0., 1.),
-        );
+        let r = Ray::new(Point::new(0., 1., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default();
         let roots = s.intersect(&r).unwrap();
-        assert_eq!(roots.roots[0], 5.);
-        assert_eq!(roots.roots[1], 5.);
+        assert_eq!(roots[0].t, 5.);
+        assert_eq!(roots[1].t, 5.);
     }
 
     #[test]
     pub fn ray_missed_sphere() {
-        let r = Ray::new(
-            crate::tuple::Point::new(0., 2., -5.),
-            crate::tuple::Vector::new(0., 0., 1.),
-        );
+        let r = Ray::new(Point::new(0., 2., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default();
         let roots = s.intersect(&r);
         assert!(roots.is_none());
@@ -125,26 +130,20 @@ mod tests {
 
     #[test]
     pub fn ray_originates_inside_sphere() {
-        let r = Ray::new(
-            crate::tuple::Point::new(0., 0., 0.),
-            crate::tuple::Vector::new(0., 0., 1.),
-        );
+        let r = Ray::new(Point::new(0., 0., 0.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default();
         let roots = s.intersect(&r).unwrap();
-        assert_eq!(roots.roots[0], -1.);
-        assert_eq!(roots.roots[1], 1.);
+        assert_eq!(roots[0].t, -1.);
+        assert_eq!(roots[1].t, 1.);
     }
 
     #[test]
     pub fn ray_is_behind_sphere() {
-        let r = Ray::new(
-            crate::tuple::Point::new(0., 0., 5.),
-            crate::tuple::Vector::new(0., 0., 1.),
-        );
+        let r = Ray::new(Point::new(0., 0., 5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default();
         let roots = s.intersect(&r).unwrap();
-        assert_eq!(roots.roots[0], -6.);
-        assert_eq!(roots.roots[1], -4.);
+        assert_eq!(roots[0].t, -6.);
+        assert_eq!(roots[1].t, -4.);
     }
 
     #[test]
@@ -161,8 +160,8 @@ mod tests {
         let s = Sphere::static_default()
             .transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
         let intersects = s.intersect(&r).unwrap();
-        assert_eq!(intersects.roots[0], 3.);
-        assert_eq!(intersects.roots[1], 7.);
+        assert_eq!(intersects[0].t, 3.);
+        assert_eq!(intersects[1].t, 7.);
     }
 
     #[test]

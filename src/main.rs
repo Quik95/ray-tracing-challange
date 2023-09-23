@@ -1,14 +1,17 @@
-use crate::canvas::Canvas;
-use crate::matrix::Matrix4;
-use crate::objects::Hittable;
-use crate::ray::Ray;
-use crate::tuple::{Color, Point};
+use std::f32::consts::PI;
 
+use crate::matrix::Matrix4;
+use crate::objects::Sphere;
+
+use crate::tuple::{Color, Point, Vector};
+
+use crate::camera::Camera;
 use crate::light::PointLight;
 use crate::material::Material;
 use std::io;
 use std::io::{BufWriter, Write};
 
+mod camera;
 mod canvas;
 mod light;
 mod material;
@@ -16,43 +19,80 @@ mod matrix;
 mod objects;
 mod ray;
 mod tuple;
+mod world;
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
 
-    let canvas_pixels = 1000;
-    let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let t = Matrix4::identity();
-    let sphere = objects::Sphere::default_with_material(Material {
-        color: Color::new(1., 0.2, 1.),
+    let material = Material {
+        color: Color::new(1., 0.9, 0.9),
+        specular: 0.0,
+        ..Default::default()
+    };
+    let floor = Sphere::default_with_material(material)
+        .transform(&Matrix4::identity().scale(&Vector::new(10., 0.01, 10.)));
+
+    let left_wall = Sphere::default_with_material(material).transform(
+        &Matrix4::identity()
+            .scale(&Vector::new(10., 0.01, 10.))
+            .rotate_x(PI / 2.)
+            .rotate_y(-PI / 4.)
+            .translate(&Vector::new(0., 0., 5.)),
+    );
+    let right_wall = Sphere::default_with_material(material).transform(
+        &Matrix4::identity()
+            .scale(&Vector::new(10., 0.01, 10.))
+            .rotate_x(PI / 2.)
+            .rotate_y(PI / 4.)
+            .translate(&Vector::new(0., 0., 5.)),
+    );
+
+    let middle = Sphere::default_with_material(Material {
+        color: Color::new(0.1, 1., 0.5),
+        diffuse: 0.7,
+        specular: 0.3,
         ..Default::default()
     })
-    .transform(&t);
-    let light = PointLight::new(Point::new(-10., 10., -10.), Color::new(1., 1., 1.));
+    .transform(&Matrix4::identity().translate(&Vector::new(-0.5, 1., 0.5)));
 
-    let ray_origin = Point::new(0., 0., -5.);
-    let wall_z = 10.;
-    let wall_size = 7.0;
-    let pixel_size = wall_size / canvas_pixels as f32;
-    let half = pixel_size / 2.;
+    let right = Sphere::default_with_material(Material {
+        color: Color::new(0.5, 1., 0.1),
+        diffuse: 0.7,
+        specular: 0.3,
+        ..Default::default()
+    })
+    .transform(
+        &Matrix4::identity()
+            .scale(&Vector::new(0.5, 0.5, 0.5))
+            .translate(&Vector::new(1.5, 0.5, -0.5)),
+    );
 
-    for y in (-canvas.center_point.y as i32)..(canvas.center_point.y as i32) {
-        let world_y = half - pixel_size * y as f32;
-        for x in (-canvas.center_point.x as i32)..(canvas.center_point.x as i32) {
-            let world_x = -half + pixel_size * x as f32;
-            let p = Point::new(world_x, world_y, wall_z);
-            let r = Ray::new(ray_origin, (p - ray_origin).normalize());
-            if let Some(xs) = sphere.intersect(&r) {
-                let hit = xs.get_hit().unwrap();
-                let point = r.position(hit);
-                let normal = xs.object.get_normal(&point);
-                let eye = -r.direction;
-                let color =
-                    light.calculate_lighting(xs.object.get_material(), &point, &eye, &normal);
-                canvas.write_pixel(x, -y, color).unwrap();
-            }
-        }
-    }
+    let left = Sphere::default_with_material(Material {
+        color: Color::new(1., 0.8, 0.1),
+        diffuse: 0.7,
+        specular: 0.3,
+        ..Default::default()
+    })
+    .transform(
+        &Matrix4::identity()
+            .scale(&Vector::new(0.33, 0.33, 0.33))
+            .translate(&Vector::new(-1.5, 0.33, -0.75)),
+    );
+
+    let light_source = PointLight::new(Point::new(-10., 10., -10.), Color::new(1., 1., 1.));
+    let world = world::World::new(
+        light_source,
+        vec![floor, left_wall, right_wall, middle, right, left],
+    );
+
+    let mut camera = Camera::new(1000, 1000, PI / 3.);
+    camera.set_transform(
+        Point::new(0., 1.5, -5.),
+        Point::new(0., 1., 0.),
+        Vector::new(0., 1., 0.),
+    );
+
+    let canvas = camera.render(&world);
 
     let ppm = canvas.convert_to_ppm();
     dump_to_stdout(ppm.as_bytes())?;

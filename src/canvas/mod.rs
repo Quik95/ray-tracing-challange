@@ -3,15 +3,15 @@ use color_eyre::eyre::eyre;
 use color_eyre::Result;
 
 pub struct Canvas {
-    pub width: u32,
-    pub height: u32,
+    pub width: usize,
+    pub height: usize,
     pub pixels: Vec<Color>,
     pub center_point: Point,
 }
 
 impl Canvas {
-    pub fn new(width: u32, height: u32) -> Self {
-        let pixels = vec![Color::new(0., 0., 0.); (width * height) as usize];
+    pub fn new(width: usize, height: usize) -> Self {
+        let pixels = vec![Color::new(0., 0., 0.); width * height];
         Self {
             width,
             height,
@@ -20,31 +20,33 @@ impl Canvas {
         }
     }
 
-    fn index_at(&self, x: i32, y: i32) -> Result<usize> {
-        let x = (x + self.center_point.x as i32) as u32;
-        let y = (-y + self.center_point.y as i32) as u32;
+    fn index_at(&self, x: usize, y: usize) -> Result<usize> {
         if x >= self.width || y >= self.height {
-            return Err(eyre!("Index out of bounds: ({}, {})", x, y));
+            return Err(eyre!(
+                "Index out of bounds: ({x}, {y}). Canvas size: ({}, {})",
+                self.width,
+                self.height
+            ));
         }
 
-        Ok((y * self.width + x) as usize)
+        Ok(y * self.width + x)
     }
 
-    pub fn write_pixel(&mut self, x: i32, y: i32, color: Color) -> Result<()> {
+    pub fn write_pixel(&mut self, x: usize, y: usize, color: Color) -> Result<()> {
         let index = self.index_at(x, y)?;
         self.pixels[index] = color;
         Ok(())
     }
 
-    pub fn pixel_at(&self, x: i32, y: i32) -> Result<Color> {
+    pub fn pixel_at(&self, x: usize, y: usize) -> Result<Color> {
         let index = self.index_at(x, y)?;
         Ok(self.pixels[index])
     }
 
-    pub fn draw_circle(&mut self, x: i32, y: i32, radius: i32) -> Result<()> {
-        for i in x - radius..x + radius {
-            for j in y - radius..y + radius {
-                if (i - x).pow(2) + (j - y).pow(2) <= radius.pow(2) {
+    pub fn draw_circle(&mut self, x: usize, y: usize, radius: u32) -> Result<()> {
+        for i in x.saturating_sub(radius as usize)..x + radius as usize {
+            for j in y.saturating_sub(radius as usize)..y + radius as usize {
+                if (i - x).pow(2) + (j - y).pow(2) <= radius.pow(2) as usize {
                     self.write_pixel(i, j, Color::new(1., 1., 1.))?;
                 }
             }
