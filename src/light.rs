@@ -15,12 +15,17 @@ impl PointLight {
         pos: &Point,
         eye_vector: &Vector,
         normal_vector: &Vector,
+        in_shadow: bool,
     ) -> Color {
         let diffuse;
         let specular;
 
         let effective_color = material.color * self.intensity;
         let ambient = effective_color * material.ambient;
+        if in_shadow {
+            return ambient;
+        }
+
         let light_vector = (self.position - pos).normalize();
         let light_dot_normal = light_vector.dot(normal_vector);
         if light_dot_normal < 0. {
@@ -54,6 +59,7 @@ mod tests {
     Vector::new(0., 0., -1.),
     Vector::new(0., 0., -1.),
     PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.)),
+    false,
     Color::new(1.9, 1.9, 1.9) ;
     "eye between light and surface, eye offset 45 degrees"
     )]
@@ -61,6 +67,7 @@ mod tests {
     Vector::new(0., 2.0_f32.sqrt() / 2., 2.0_f32.sqrt() / 2.),
     Vector::new(0., 0., -1.),
     PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.)),
+    false,
     Color::new(1., 1., 1.) ;
     "eye between light and surface"
     )]
@@ -68,6 +75,7 @@ mod tests {
     Vector::new(0., 0., -1.),
     Vector::new(0., 0., -1.),
     PointLight::new(Point::new(0., 10., -10.), Color::new(1., 1., 1.)),
+    false,
     Color::new(0.7364, 0.7364, 0.7364) ;
     "eye opposite surface, light offset 45 degrees"
     )]
@@ -75,6 +83,7 @@ mod tests {
     Vector::new(0., -(2.0_f32.sqrt()) / 2., -(2.0_f32.sqrt()) / 2.),
     Vector::new(0., 0., -1.),
     PointLight::new(Point::new(0., 10., -10.), Color::new(1., 1., 1.)),
+    false,
     Color::new(1.63638, 1.63638, 1.63638) ;
     "eye in path of reflection vector"
     )]
@@ -82,6 +91,7 @@ mod tests {
     Vector::new(0., 0., -1.),
     Vector::new(0., 0., -1.),
     PointLight::new(Point::new(0., 0., 10.), Color::new(1., 1., 1.)),
+    false,
     Color::new(0.1, 0.1, 0.1) ;
     "light behind a surface"
     )]
@@ -89,11 +99,12 @@ mod tests {
         eyev: Vector,
         normalv: Vector,
         light: PointLight,
+        in_shadow: bool,
         expected: Color,
     ) {
         let position = Point::zero();
         let material = Material::default();
-        let result = light.calculate_lighting(&material, &position, &eyev, &normalv);
+        let result = light.calculate_lighting(&material, &position, &eyev, &normalv, in_shadow);
         assert_eq!(result, expected);
     }
 }

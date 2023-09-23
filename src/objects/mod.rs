@@ -62,8 +62,9 @@ impl Intersection {
         } else {
             inside = false;
         }
+        let over_point = point + normal * 0.01;
 
-        PrecomputedHit::new(self, point, eye, normal, inside)
+        PrecomputedHit::new(self, point, eye, normal, inside, over_point)
     }
 }
 
@@ -74,13 +75,15 @@ pub struct PrecomputedHit {
     pub eye: Vector,
     pub normal: Vector,
     pub inside: bool,
+    pub over_point: Point,
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::matrix::Matrix4;
     use crate::objects::{Intersection, Sphere};
     use crate::ray::Ray;
-    use crate::tuple::{Point, Vector};
+    use crate::tuple::{Point, Vector, EPSILON};
 
     #[test]
     pub fn when_all_t_positive() {
@@ -142,5 +145,16 @@ mod tests {
         assert_eq!(ph.eye, Vector::new(0., 0., -1.));
         assert_eq!(ph.normal, Vector::new(0., 0., -1.));
         assert!(ph.inside);
+    }
+
+    #[test]
+    pub fn hit_should_offset_point() {
+        let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
+        let shape = Sphere::static_default()
+            .transform(&Matrix4::identity().translate(&Vector::new(0., 0., 1.)));
+        let i = Intersection::new(5., shape);
+        let comps = i.precompute_hit(&r);
+        assert!(comps.over_point.z < -EPSILON / 2.);
+        assert!(comps.point.z > comps.over_point.z);
     }
 }

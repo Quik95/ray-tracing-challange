@@ -3,7 +3,7 @@ use crate::material::Material;
 use crate::matrix::Matrix4;
 use crate::objects::{Hittable, Intersection, PrecomputedHit, Sphere};
 use crate::ray::Ray;
-use crate::tuple::{Color, Vector};
+use crate::tuple::{Color, Point, Vector};
 use derive_more::Constructor;
 use itertools::Itertools;
 use nalgebra::matrix;
@@ -41,7 +41,7 @@ impl World {
         self.objects
             .iter()
             .map(|&x| x.intersect(r))
-            .filter(std::option::Option::is_some)
+            .filter(Option::is_some)
             .flatten()
             .flatten()
             .sorted()
@@ -49,11 +49,14 @@ impl World {
     }
 
     fn shade_hit(&self, comps: &PrecomputedHit) -> Color {
+        let shadowed = self.is_shadowed(&comps.over_point);
+
         self.light_source.calculate_lighting(
             comps.intersection.object.get_material(),
-            &comps.point,
+            &comps.over_point,
             &comps.eye,
             &comps.normal,
+            shadowed,
         )
     }
 
@@ -64,6 +67,18 @@ impl World {
         } else {
             Color::new(0., 0., 0.)
         }
+    }
+
+    pub fn is_shadowed(&self, p: &Point) -> bool {
+        let v = self.light_source.position - p;
+        let distance = v.magnitude();
+        let direction = v.normalize();
+
+        let r = Ray::new(*p, direction);
+        let intersections = self.intersect_world(&r);
+        let h = Intersection::get_hit(&intersections);
+
+        h.is_some() && h.unwrap().t < distance
     }
 }
 
@@ -95,11 +110,12 @@ mod tests {
     use crate::light::PointLight;
     use crate::material::Material;
     use crate::matrix::Matrix4;
-    use crate::objects::Sphere;
+    use crate::objects::{Intersection, Sphere};
     use crate::ray::Ray;
     use crate::tuple::{Color, Point, Vector};
     use crate::world::World;
     use nalgebra::matrix;
+    use test_case::test_case;
 
     #[test]
     pub fn intersect_world_with_ray() {
@@ -238,5 +254,31 @@ mod tests {
         ]
         .into();
         assert_eq!(v, res);
+    }
+
+    #[test_case(Point::new(0., 10., 0.), false ; "point is not shadowed when nothing is collinear with point and light")]
+    #[test_case(Point::new(10., -10., 10.), true ; "shadow when object is between point and light")]
+    #[test_case(Point::new(-20., 10., -20.), false ; "point is not shadowed when object is behind light")]
+    #[test_case(Point::new(-2., 2., -2.), false ; "no shadow when object is behind point")]
+    pub fn no_shadow_when_nothing_is_collinear_with_point_and_light(p: Point, expected: bool) {
+        let w = World::default();
+        assert_eq!(w.is_shadowed(&p), expected);
+    }
+
+    #[test]
+    pub fn shade_hit_in_shadow() {
+        let s1 = Sphere::static_default();
+        let s2 = Sphere::static_default()
+            .transform(&Matrix4::identity().translate(&Vector::new(0., 0., 10.)));
+        let light = PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.));
+        let w = World {
+            objects: vec![s1, s2],
+            light_source: light,
+        };
+        let r = Ray::new(Point::new(0., 0., 5.), Vector::new(0., 0., 1.));
+        let i = Intersection::new(4., s2);
+        let comps = i.precompute_hit(&r);
+        let c = w.shade_hit(&comps);
+        assert_eq!(c, Color::new(0.1, 0.1, 0.1));
     }
 }
