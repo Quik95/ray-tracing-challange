@@ -187,6 +187,14 @@ impl Sub<&Point> for Point {
     }
 }
 
+impl Sub<Point> for &Point {
+    type Output = Vector;
+
+    fn sub(self, rhs: Point) -> Self::Output {
+        Vector::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
 #[derive(
     Add,
     AddAssign,

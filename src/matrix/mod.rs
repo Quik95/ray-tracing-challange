@@ -67,6 +67,26 @@ impl Mul<Point> for &Matrix4 {
     }
 }
 
+impl Mul<&Point> for Matrix4 {
+    type Output = Point;
+
+    fn mul(self, rhs: &Point) -> Self::Output {
+        let p: Point4<f32> = (*rhs).into();
+        let res = self.0 * p;
+        Point::new(res.x, res.y, res.z)
+    }
+}
+
+impl Mul<&Point> for &Matrix4 {
+    type Output = Point;
+
+    fn mul(self, rhs: &Point) -> Self::Output {
+        let p: Point4<f32> = (*rhs).into();
+        let res = self.0 * p;
+        Point::new(res.x, res.y, res.z)
+    }
+}
+
 impl Mul<Vector> for Matrix4 {
     type Output = Vector;
 

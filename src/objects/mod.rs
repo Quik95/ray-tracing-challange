@@ -1,4 +1,8 @@
+mod plane;
 mod sphere;
+
+pub use plane::Plane;
+pub use sphere::Sphere;
 
 use crate::ray::Ray;
 use derive_more::Constructor;
@@ -6,20 +10,32 @@ use std::cmp::Ordering;
 use uuid::Uuid;
 
 use crate::material::Material;
+use crate::matrix::Matrix4;
 use crate::tuple::{Point, Vector};
-pub use sphere::Sphere;
 
-pub trait Hittable {
-    fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
-    fn get_normal(&self, point: &Point) -> Vector;
+pub trait Shape {
+    fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
+    fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
+        let ray = ray.transform(&self.get_transform().inverse());
+        self.local_intersect(&ray)
+    }
+    fn local_normal(&self, p: &Point) -> Vector;
+    fn get_normal(&self, point: &Point) -> Vector {
+        let local_point = self.get_transform().inverse() * point;
+        let local_normal = self.local_normal(&local_point);
+        let world_normal = self.get_transform().inverse().transpose() * local_normal;
+
+        world_normal.normalize()
+    }
     fn get_material(&self) -> &Material;
+    fn get_transform(&self) -> &Matrix4;
     fn get_id(&self) -> &Uuid;
 }
 
 #[derive(Constructor, Copy, Clone)]
 pub struct Intersection {
     pub t: f32,
-    pub object: &'static dyn Hittable,
+    pub object: &'static dyn Shape,
 }
 
 impl Eq for Intersection {}
@@ -151,7 +167,7 @@ mod tests {
     pub fn hit_should_offset_point() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let shape = Sphere::static_default()
-            .transform(&Matrix4::identity().translate(&Vector::new(0., 0., 1.)));
+            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 0., 1.)));
         let i = Intersection::new(5., shape);
         let comps = i.precompute_hit(&r);
         assert!(comps.over_point.z < -EPSILON / 2.);

@@ -1,7 +1,7 @@
 use crate::light::PointLight;
 use crate::material::Material;
 use crate::matrix::Matrix4;
-use crate::objects::{Hittable, Intersection, PrecomputedHit, Sphere};
+use crate::objects::{Intersection, PrecomputedHit, Shape, Sphere};
 use crate::ray::Ray;
 use crate::tuple::{Color, Point, Vector};
 use derive_more::Constructor;
@@ -11,7 +11,7 @@ use nalgebra::matrix;
 #[derive(Constructor)]
 pub struct World {
     pub light_source: PointLight,
-    pub objects: Vec<&'static dyn Hittable>,
+    pub objects: Vec<&'static dyn Shape>,
 }
 
 impl Default for World {
@@ -24,7 +24,7 @@ impl Default for World {
             200.0,
         ));
         let s2 = Sphere::static_default()
-            .transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
+            .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
 
         Self {
             light_source: PointLight::new(
@@ -110,7 +110,7 @@ mod tests {
     use crate::light::PointLight;
     use crate::material::Material;
     use crate::matrix::Matrix4;
-    use crate::objects::{Intersection, Sphere};
+    use crate::objects::{Intersection, Shape, Sphere};
     use crate::ray::Ray;
     use crate::tuple::{Color, Point, Vector};
     use crate::world::World;
@@ -143,7 +143,7 @@ mod tests {
         let i = crate::objects::Intersection::new(4., shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
-        assert_eq!(c, crate::tuple::Color::new(0.38066, 0.47583, 0.2855));
+        assert_eq!(c, crate::tuple::Color::new(0.38042, 0.47552, 0.28531));
     }
 
     #[test]
@@ -163,7 +163,7 @@ mod tests {
         let i = crate::objects::Intersection::new(0.5, shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
-        assert_eq!(c, crate::tuple::Color::new(0.90498, 0.90498, 0.90498));
+        assert_eq!(c, crate::tuple::Color::new(0.90168, 0.90168, 0.90168));
     }
 
     #[test]
@@ -183,7 +183,7 @@ mod tests {
             crate::tuple::Point::new(0., 0., -5.),
             crate::tuple::Vector::new(0., 0., 1.),
         );
-        assert_eq!(w.color_at(&r), Color::new(0.38066, 0.47583, 0.2855));
+        assert_eq!(w.color_at(&r), Color::new(0.38042, 0.47552, 0.28531));
     }
 
     #[test]
@@ -199,7 +199,7 @@ mod tests {
             ambient: 1.0,
             ..Default::default()
         })
-        .transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
+        .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
 
         let w = World {
             objects: vec![s1, s2],
@@ -269,7 +269,7 @@ mod tests {
     pub fn shade_hit_in_shadow() {
         let s1 = Sphere::static_default();
         let s2 = Sphere::static_default()
-            .transform(&Matrix4::identity().translate(&Vector::new(0., 0., 10.)));
+            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 0., 10.)));
         let light = PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.));
         let w = World {
             objects: vec![s1, s2],

@@ -2,7 +2,7 @@ use crate::material::Material;
 use uuid::Uuid;
 
 use crate::matrix::Matrix4;
-use crate::objects::{Hittable, Intersection};
+use crate::objects::{Intersection, Shape};
 use crate::ray::Ray;
 use crate::tuple::{Point, Vector};
 
@@ -35,8 +35,8 @@ impl Sphere {
         leaked
     }
 
-    pub fn transform(&'static mut self, &transform: &Matrix4) -> &'static mut Self {
-        self.transform = transform * self.transform;
+    pub fn set_transform(&'static mut self, transform: &Matrix4) -> &'static mut Self {
+        self.transform = *transform * self.transform;
         self
     }
 }
@@ -51,12 +51,10 @@ impl Default for Sphere {
     }
 }
 
-impl Hittable for Sphere {
-    fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
+impl Shape for Sphere {
+    fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
         let origin = Point::zero();
         let radius = 1.0;
-        let ray = ray.transform(&self.transform.inverse());
-
         let sphere_to_ray = ray.origin - origin;
         let a = ray.direction.dot(&ray.direction);
         let b = 2. * ray.direction.dot(&sphere_to_ray);
@@ -76,16 +74,16 @@ impl Hittable for Sphere {
         ])
     }
 
-    fn get_normal(&self, point: &Point) -> Vector {
-        let object_point = self.transform.inverse() * *point;
-        let object_normal = (object_point - Point::zero()).normalize();
-        let world_normal = self.transform.inverse().transpose() * object_normal;
-
-        world_normal.normalize()
+    fn local_normal(&self, p: &Point) -> Vector {
+        (p - Point::zero()).normalize()
     }
 
     fn get_material(&self) -> &Material {
         &self.material
+    }
+
+    fn get_transform(&self) -> &Matrix4 {
+        &self.transform
     }
 
     fn get_id(&self) -> &Uuid {
@@ -98,7 +96,7 @@ mod tests {
     use test_case::test_case;
 
     use crate::matrix::Matrix4;
-    use crate::objects::{Hittable, Sphere};
+    use crate::objects::{Shape, Sphere};
     use crate::ray::Ray;
     use crate::tuple::{Point, Vector};
 
@@ -150,7 +148,7 @@ mod tests {
     pub fn changing_the_sphere_transform() {
         let s = Sphere::static_default();
         let t = Matrix4::identity().translate(&Vector::new(2., 3., 4.));
-        let s2 = s.transform(&t);
+        let s2 = s.set_transform(&t);
         assert_eq!(s2.transform, t);
     }
 
@@ -158,7 +156,7 @@ mod tests {
     pub fn intersect_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
-            .transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
+            .set_transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
         let intersects = s.intersect(&r).unwrap();
         assert_eq!(intersects[0].t, 3.);
         assert_eq!(intersects[1].t, 7.);
@@ -168,7 +166,7 @@ mod tests {
     pub fn intersect_translated_ray_with_sphere() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
-            .transform(&Matrix4::identity().translate(&Vector::new(5., 0., 0.)));
+            .set_transform(&Matrix4::identity().translate(&Vector::new(5., 0., 0.)));
         let intersects = s.intersect(&r);
         assert!(intersects.is_none());
     }
@@ -204,14 +202,14 @@ mod tests {
     #[test]
     pub fn normal_of_translated_sphere() {
         let s = Sphere::static_default()
-            .transform(&Matrix4::identity().translate(&Vector::new(0., 1., 0.)));
+            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 1., 0.)));
         let n = s.get_normal(&Point::new(0., 1.70711, -0.70711));
         assert_eq!(n, Vector::new(0., 0.70711, -0.70711));
     }
 
     #[test]
     pub fn normal_of_transformed_sphere() {
-        let s = Sphere::static_default().transform(
+        let s = Sphere::static_default().set_transform(
             &Matrix4::identity()
                 .rotate_z(std::f32::consts::PI / 5.)
                 .scale(&Vector::new(1., 0.5, 1.)),
