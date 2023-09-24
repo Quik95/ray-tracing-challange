@@ -125,6 +125,10 @@ impl Point {
             z: 0.,
         }
     }
+
+    pub const fn one() -> Self {
+        Self::new(1., 1., 1.)
+    }
 }
 
 impl Add for Point {
@@ -219,6 +223,21 @@ pub struct Color {
 impl Color {
     pub fn hadamard_product(&self, other: &Self) -> Self {
         Self::new(self.r * other.r, self.g * other.g, self.b * other.b)
+    }
+
+    pub const fn white() -> Self {
+        Self {
+            r: 1.,
+            g: 1.,
+            b: 1.,
+        }
+    }
+    pub const fn black() -> Self {
+        Self {
+            r: 0.,
+            g: 0.,
+            b: 0.,
+        }
     }
 }
 

@@ -148,7 +148,7 @@ mod tests {
         let image = c.render(&w);
         assert_eq!(
             image.pixel_at(5, 5).unwrap(),
-            Color::new(0.38042, 0.47552, 0.28531)
+            Color::new(0.38066, 0.47582, 0.28549)
         );
     }
 }

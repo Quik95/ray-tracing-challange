@@ -8,6 +8,7 @@ use crate::tuple::{Color, Point, Vector};
 use crate::camera::Camera;
 use crate::light::PointLight;
 use crate::material::Material;
+use crate::pattern::Pattern;
 use std::io;
 use std::io::{BufWriter, Write};
 
@@ -17,6 +18,7 @@ mod light;
 mod material;
 mod matrix;
 mod objects;
+mod pattern;
 mod ray;
 mod tuple;
 mod world;
@@ -24,22 +26,45 @@ mod world;
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
 
-    let material = Material {
+    let _material = Material {
         color: Color::new(1., 0.9, 0.9),
         specular: 0.0,
         ..Default::default()
     };
-    let floor: &'static dyn Shape = Plane::default_with_material(material);
-    let backdrop: &'static dyn Shape = Plane::default_with_material(material).set_transform(
+    let floor: &'static dyn Shape = Plane::default_with_material(Material {
+        pattern: Some(pattern::Checkers::new(
+            Color::new(1., 0., 0.),
+            Color::black(),
+        )),
+        ..Default::default()
+    });
+    let _backdrop: &'static dyn Shape = Plane::default_with_material(Material {
+        color: Color::new(1., 0.9, 0.9),
+        specular: 0.0,
+        pattern: Some(pattern::LinearGradient::new(
+            Color::new(1.0, 0.0, 0.1),
+            Color::new(0.0, 1.0, 0.1),
+        )),
+        ..Default::default()
+    })
+    .set_transform(
         Matrix4::identity()
             .rotate_x(PI / 2.)
             .translate(&Vector::new(0., 0., 10.)),
     );
 
+    let mut middle_pattern =
+        pattern::Ring::new(Color::new(1.0, 0.0, 0.1), Color::new(0.0, 1.0, 0.1));
+    middle_pattern.set_transform(
+        &Matrix4::identity()
+            .rotate_x(PI / 2.)
+            .scale(&Vector::new(0.1, 0.1, 0.1)),
+    );
     let middle: &'static dyn Shape = Sphere::default_with_material(Material {
         color: Color::new(0.1, 1., 0.5),
         diffuse: 0.7,
         specular: 0.3,
+        pattern: Some(middle_pattern),
         ..Default::default()
     })
     .set_transform(&Matrix4::identity().translate(&Vector::new(-0.5, 1., 0.5)));
@@ -48,6 +73,10 @@ fn main() -> color_eyre::Result<()> {
         color: Color::new(0.5, 1., 0.1),
         diffuse: 0.7,
         specular: 0.3,
+        pattern: Some(pattern::LinearGradient::new(
+            Color::new(1., 0., 0.),
+            Color::new(0., 0., 1.),
+        )),
         ..Default::default()
     })
     .set_transform(
@@ -60,6 +89,7 @@ fn main() -> color_eyre::Result<()> {
         color: Color::new(1., 0.8, 0.1),
         diffuse: 0.7,
         specular: 0.3,
+        pattern: None,
         ..Default::default()
     })
     .set_transform(
@@ -81,10 +111,7 @@ fn main() -> color_eyre::Result<()> {
     );
 
     let light_source = PointLight::new(Point::new(-10., 10., -10.), Color::new(1., 1., 1.));
-    let world = world::World::new(
-        light_source,
-        vec![floor, backdrop, middle, right, left, left2],
-    );
+    let world = world::World::new(light_source, vec![floor, middle, right, left, left2]);
 
     let mut camera = Camera::new(1000, 1000, PI / 3.);
     camera.set_transform(

@@ -1,4 +1,5 @@
 use crate::material::Material;
+use crate::objects::Shape;
 use crate::tuple::{Color, Point, Vector};
 use derive_more::Constructor;
 
@@ -12,6 +13,7 @@ impl PointLight {
     pub fn calculate_lighting(
         &self,
         material: &Material,
+        object: &dyn Shape,
         pos: &Point,
         eye_vector: &Vector,
         normal_vector: &Vector,
@@ -20,7 +22,12 @@ impl PointLight {
         let diffuse;
         let specular;
 
-        let effective_color = material.color * self.intensity;
+        let effective_color = if let Some(p) = &material.pattern {
+            p.color_object(object, pos)
+        } else {
+            material.color
+        };
+        let effective_color = effective_color * self.intensity;
         let ambient = effective_color * material.ambient;
         if in_shadow {
             return ambient;
@@ -52,6 +59,8 @@ impl PointLight {
 mod tests {
     use crate::light::PointLight;
     use crate::material::Material;
+    use crate::objects::Sphere;
+    use crate::pattern::Stripe;
     use crate::tuple::{Color, Point, Vector};
     use test_case::test_case;
 
@@ -104,7 +113,28 @@ mod tests {
     ) {
         let position = Point::zero();
         let material = Material::default();
-        let result = light.calculate_lighting(&material, &position, &eyev, &normalv, in_shadow);
+        let obj = Sphere::default();
+        let result =
+            light.calculate_lighting(&material, &obj, &position, &eyev, &normalv, in_shadow);
         assert_eq!(result, expected);
+    }
+
+    #[test_case(Point::new(0.9, 0.0, 0.0), Color::white())]
+    #[test_case(Point::new(1.1, 0.0, 0.0), Color::black())]
+    pub fn lighting_with_pattern_applied(p: Point, expected: Color) {
+        let pattern = Stripe::new(Color::white(), Color::black());
+        let material = Material {
+            pattern: Some(pattern),
+            ambient: 1.,
+            diffuse: 0.,
+            specular: 0.,
+            ..Default::default()
+        };
+        let eyev = Vector::new(0., 0., -1.);
+        let normalv = Vector::new(0., 0., -1.);
+        let light = PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.));
+        let obj = Sphere::default();
+        let c = light.calculate_lighting(&material, &obj, &p, &eyev, &normalv, false);
+        assert_eq!(c, expected);
     }
 }

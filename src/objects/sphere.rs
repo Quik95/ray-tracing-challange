@@ -6,7 +6,7 @@ use crate::objects::{Intersection, Shape};
 use crate::ray::Ray;
 use crate::tuple::{Point, Vector};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct Sphere {
     pub id: Uuid,
     pub transform: Matrix4,

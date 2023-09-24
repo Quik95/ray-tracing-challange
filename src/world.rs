@@ -22,6 +22,7 @@ impl Default for World {
             0.7,
             0.2,
             200.0,
+            None,
         ));
         let s2 = Sphere::static_default()
             .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
@@ -53,6 +54,7 @@ impl World {
 
         self.light_source.calculate_lighting(
             comps.intersection.object.get_material(),
+            comps.intersection.object,
             &comps.over_point,
             &comps.eye,
             &comps.normal,
@@ -143,7 +145,7 @@ mod tests {
         let i = crate::objects::Intersection::new(4., shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
-        assert_eq!(c, crate::tuple::Color::new(0.38042, 0.47552, 0.28531));
+        assert_eq!(c, crate::tuple::Color::new(0.38066, 0.47582, 0.28549));
     }
 
     #[test]
@@ -163,7 +165,7 @@ mod tests {
         let i = crate::objects::Intersection::new(0.5, shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
-        assert_eq!(c, crate::tuple::Color::new(0.90168, 0.90168, 0.90168));
+        assert_eq!(c, crate::tuple::Color::new(0.90498, 0.90498, 0.90498));
     }
 
     #[test]
@@ -183,7 +185,7 @@ mod tests {
             crate::tuple::Point::new(0., 0., -5.),
             crate::tuple::Vector::new(0., 0., 1.),
         );
-        assert_eq!(w.color_at(&r), Color::new(0.38042, 0.47552, 0.28531));
+        assert_eq!(w.color_at(&r), Color::new(0.38066, 0.47582, 0.28549));
     }
 
     #[test]
@@ -194,6 +196,7 @@ mod tests {
             0.7,
             0.2,
             200.0,
+            None,
         ));
         let s2 = Sphere::default_with_material(Material {
             ambient: 1.0,

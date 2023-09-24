@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 use crate::material::Material;
 use crate::matrix::Matrix4;
-use crate::tuple::{Point, Vector};
+use crate::tuple::{Point, Vector, EPSILON};
 
 pub trait Shape {
     fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
@@ -78,7 +78,7 @@ impl Intersection {
         } else {
             inside = false;
         }
-        let over_point = point + normal * 0.01;
+        let over_point = point + normal * EPSILON;
 
         PrecomputedHit::new(self, point, eye, normal, inside, over_point)
     }
