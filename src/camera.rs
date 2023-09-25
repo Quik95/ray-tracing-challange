@@ -15,6 +15,7 @@ pub struct Camera {
     pub pixel_size: f32,
     pub half_width: f32,
     pub half_height: f32,
+    pub samples_pre_pixel: usize,
 }
 
 const SAMPLES_PER_PIXEL: usize = 2;
@@ -29,6 +30,7 @@ impl Camera {
             pixel_size: 0.,
             half_width: 0.,
             half_height: 0.,
+            samples_pre_pixel: SAMPLES_PER_PIXEL,
         };
 
         let half_view = (fov / 2.).tan();
@@ -51,8 +53,17 @@ impl Camera {
     }
 
     fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
-        let xoffset = (px as f32 + 0.5 + rand::thread_rng().gen_range(-0.5..0.5)) * self.pixel_size;
-        let yoffset = (py as f32 + 0.5 + rand::thread_rng().gen_range(-0.5..0.5)) * self.pixel_size;
+        let (xoffset, yoffset) = if self.samples_pre_pixel == 1 {
+            (
+                (px as f32 + 0.5) * self.pixel_size,
+                (py as f32 + 0.5) * self.pixel_size,
+            )
+        } else {
+            (
+                (px as f32 + rand::thread_rng().gen_range(0.0..=0.5)) * self.pixel_size,
+                (py as f32 + rand::thread_rng().gen_range(0.0..=0.5)) * self.pixel_size,
+            )
+        };
 
         let world_x = self.half_width - xoffset;
         let world_y = self.half_height - yoffset;
@@ -69,13 +80,13 @@ impl Camera {
         let mut canvas = Canvas::new(self.hsize, self.vsize);
         for y in 0..self.vsize - 1 {
             for x in 0..self.hsize - 1 {
-                let mut color = Color::new(0., 0., 0.);
-                for _ in 0..SAMPLES_PER_PIXEL {
+                let mut color = Color::black();
+                for _ in 0..self.samples_pre_pixel {
                     let ray = self.ray_for_pixel(x, y);
                     color += world.color_at(&ray);
                 }
                 canvas
-                    .write_pixel(x, y, Self::rescale_color_range(color))
+                    .write_pixel(x, y, self.rescale_color_range(color))
                     .unwrap();
             }
         }
@@ -83,8 +94,8 @@ impl Camera {
         canvas
     }
 
-    fn rescale_color_range(color: Color) -> Color {
-        let scale = 1.0 / SAMPLES_PER_PIXEL as f32;
+    fn rescale_color_range(&self, color: Color) -> Color {
+        let scale = 1.0 / self.samples_pre_pixel as f32;
         let scaled = color * scale;
         Color::new(
             scaled.r.clamp(0., 1.),
@@ -122,7 +133,8 @@ mod tests {
 
     #[test]
     pub fn ray_through_center_of_canvas() {
-        let c = Camera::new(201, 101, PI / 2.);
+        let mut c = Camera::new(201, 101, PI / 2.);
+        c.samples_pre_pixel = 1;
         let r = c.ray_for_pixel(100, 50);
         assert_eq!(r.origin, crate::tuple::Point::new(0., 0., 0.));
         assert_eq!(r.direction, crate::tuple::Vector::new(0., 0., -1.));
@@ -130,7 +142,8 @@ mod tests {
 
     #[test]
     pub fn ray_through_corner_of_canvas() {
-        let c = Camera::new(201, 101, PI / 2.);
+        let mut c = Camera::new(201, 101, PI / 2.);
+        c.samples_pre_pixel = 1;
         let r = c.ray_for_pixel(0, 0);
         assert_eq!(r.origin, crate::tuple::Point::new(0., 0., 0.));
         assert_eq!(
@@ -142,6 +155,7 @@ mod tests {
     #[test]
     pub fn ray_when_camera_is_transformed() {
         let mut c = Camera::new(201, 101, PI / 2.);
+        c.samples_pre_pixel = 1;
         c.transform = Matrix4::identity()
             .translate(&Vector::new(0., -2., 5.))
             .rotate_y(PI / 4.);
@@ -158,6 +172,7 @@ mod tests {
     pub fn render_world_with_camera() {
         let w = World::default();
         let mut c = Camera::new(11, 11, PI / 2.);
+        c.samples_pre_pixel = 1;
         c.set_transform(
             Point::new(0., 0., -5.),
             Point::zero(),
