@@ -17,7 +17,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(vsize: usize, hsize: usize, fov: f32) -> Self {
+    pub fn new(hsize: usize, vsize: usize, fov: f32) -> Self {
         let mut c = Self {
             hsize,
             vsize,
@@ -63,7 +63,7 @@ impl Camera {
     }
 
     pub fn render(&self, world: &World) -> Canvas {
-        let mut canvas = Canvas::new(self.vsize, self.hsize);
+        let mut canvas = Canvas::new(self.hsize, self.vsize);
         for y in 0..self.vsize - 1 {
             for x in 0..self.hsize - 1 {
                 let ray = self.ray_for_pixel(x, y);
@@ -78,7 +78,7 @@ impl Camera {
 
 impl Default for Camera {
     fn default() -> Self {
-        Self::new(160, 120, PI / 2.)
+        Self::new(120, 160, PI / 2.)
     }
 }
 
@@ -92,19 +92,19 @@ mod tests {
 
     #[test]
     pub fn pixel_size_for_vertical_canvas() {
-        let c = Camera::new(200, 125, PI / 2.);
-        assert_eq!(c.pixel_size, 0.01);
-    }
-
-    #[test]
-    pub fn pixel_size_for_horizontal_canvas() {
         let c = Camera::new(125, 200, PI / 2.);
         assert_eq!(c.pixel_size, 0.01);
     }
 
     #[test]
+    pub fn pixel_size_for_horizontal_canvas() {
+        let c = Camera::new(200, 125, PI / 2.);
+        assert_eq!(c.pixel_size, 0.01);
+    }
+
+    #[test]
     pub fn ray_through_center_of_canvas() {
-        let c = Camera::new(101, 201, PI / 2.);
+        let c = Camera::new(201, 101, PI / 2.);
         let r = c.ray_for_pixel(100, 50);
         assert_eq!(r.origin, crate::tuple::Point::new(0., 0., 0.));
         assert_eq!(r.direction, crate::tuple::Vector::new(0., 0., -1.));
@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     pub fn ray_through_corner_of_canvas() {
-        let c = Camera::new(101, 201, PI / 2.);
+        let c = Camera::new(201, 101, PI / 2.);
         let r = c.ray_for_pixel(0, 0);
         assert_eq!(r.origin, crate::tuple::Point::new(0., 0., 0.));
         assert_eq!(
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     pub fn ray_when_camera_is_transformed() {
-        let mut c = Camera::new(101, 201, PI / 2.);
+        let mut c = Camera::new(201, 101, PI / 2.);
         c.transform = Matrix4::identity()
             .translate(&Vector::new(0., -2., 5.))
             .rotate_y(PI / 4.);

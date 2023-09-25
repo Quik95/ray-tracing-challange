@@ -59,7 +59,7 @@ impl Ord for Intersection {
 }
 
 impl Intersection {
-    pub fn get_hit(hits: &[Self]) -> Option<Intersection> {
+    pub fn get_hit(hits: &[Self]) -> Option<Self> {
         hits.iter()
             .filter(|&&x| x.t >= 0.)
             .min_by(|x, y| x.t.partial_cmp(&y.t).unwrap())

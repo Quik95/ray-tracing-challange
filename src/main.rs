@@ -113,7 +113,7 @@ fn main() -> color_eyre::Result<()> {
     let light_source = PointLight::new(Point::new(-10., 10., -10.), Color::new(1., 1., 1.));
     let world = world::World::new(light_source, vec![floor, middle, right, left, left2]);
 
-    let mut camera = Camera::new(1000, 1000, PI / 3.);
+    let mut camera = Camera::new(1920, 1080, PI / 3.);
     camera.set_transform(
         Point::new(0., 1.5, -5.),
         Point::new(0., 1., 0.),

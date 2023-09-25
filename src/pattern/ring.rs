@@ -21,7 +21,7 @@ impl Ring {
 
 impl Pattern for Ring {
     fn color_at(&self, point: &Point) -> Color {
-        if (point.x.powi(2) + point.z.powi(2)).sqrt().floor() % 2. == 0. {
+        if point.x.hypot(point.z).floor() % 2. == 0. {
             self.even
         } else {
             self.odd

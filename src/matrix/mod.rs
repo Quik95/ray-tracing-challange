@@ -175,7 +175,7 @@ impl Matrix4 {
 }
 
 impl Vector {
-    pub fn scale(self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: &Self) -> Self {
         let t = Matrix4::identity().scale(scale);
         t * self
     }

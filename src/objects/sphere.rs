@@ -22,13 +22,13 @@ impl PartialEq for Sphere {
 
 impl Sphere {
     pub fn static_default() -> &'static mut Self {
-        let s = Box::<Sphere>::default();
+        let s = Box::<Self>::default();
         let leaked = Box::leak(s);
         leaked
     }
 
     pub fn default_with_material(material: Material) -> &'static mut Self {
-        let mut s = Box::<Sphere>::default();
+        let mut s = Box::<Self>::default();
         s.material = material;
 
         let leaked = Box::leak(s);
@@ -54,12 +54,12 @@ impl Default for Sphere {
 impl Shape for Sphere {
     fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
         let origin = Point::zero();
-        let radius = 1.0;
+        let radius = 1.0_f32;
         let sphere_to_ray = ray.origin - origin;
         let a = ray.direction.dot(&ray.direction);
         let b = 2. * ray.direction.dot(&sphere_to_ray);
-        let c = sphere_to_ray.dot(&sphere_to_ray) - radius * radius;
-        let discriminant = b * b - 4. * a * c;
+        let c = radius.mul_add(-radius, sphere_to_ray.dot(&sphere_to_ray));
+        let discriminant = b.mul_add(b, -4. * a * c);
 
         if discriminant < 0.0 {
             return None;

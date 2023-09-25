@@ -95,7 +95,7 @@ impl Matrix4 {
         let left = forward.cross(&up_normalized);
         let true_up = left.cross(&forward);
 
-        let orientation: Matrix4 = matrix![
+        let orientation: Self = matrix![
             left.x, left.y, left.z, 0.;
             true_up.x, true_up.y, true_up.z, 0.;
             -forward.x, -forward.y, -forward.z, 0.;
@@ -103,7 +103,7 @@ impl Matrix4 {
         ]
         .into();
 
-        orientation * Matrix4::identity().translate(&Vector::new(-from.x, -from.y, -from.z))
+        orientation * Self::identity().translate(&Vector::new(-from.x, -from.y, -from.z))
     }
 }
 
