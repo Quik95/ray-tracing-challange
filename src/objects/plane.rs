@@ -31,6 +31,9 @@ impl Plane {
     }
 }
 
+unsafe impl Send for Plane {}
+unsafe impl Sync for Plane {}
+
 impl Default for Plane {
     fn default() -> Self {
         Self {

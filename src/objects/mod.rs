@@ -13,7 +13,7 @@ use crate::material::Material;
 use crate::matrix::Matrix4;
 use crate::tuple::{Point, Vector, EPSILON};
 
-pub trait Shape {
+pub trait Shape: Send + Sync {
     fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
     fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
         let ray = ray.transform(&self.get_transform().inverse());

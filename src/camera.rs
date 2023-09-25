@@ -5,6 +5,10 @@ use crate::tuple::{Color, Point, Vector};
 use crate::world::World;
 use rand::Rng;
 use std::f32::consts::PI;
+use std::sync::atomic::{AtomicI64, Ordering};
+use std::sync::mpsc;
+
+use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct Camera {
@@ -18,7 +22,7 @@ pub struct Camera {
     pub samples_pre_pixel: usize,
 }
 
-const SAMPLES_PER_PIXEL: usize = 2;
+const SAMPLES_PER_PIXEL: usize = 10;
 
 impl Camera {
     pub fn new(hsize: usize, vsize: usize, fov: f32) -> Self {
@@ -78,17 +82,28 @@ impl Camera {
 
     pub fn render(&self, world: &World) -> Canvas {
         let mut canvas = Canvas::new(self.hsize, self.vsize);
-        for y in 0..self.vsize - 1 {
-            for x in 0..self.hsize - 1 {
+        let (rx, tx) = mpsc::channel();
+        let progress = AtomicI64::new(0);
+
+        (0..self.vsize - 1).into_par_iter().for_each(|y| {
+            progress.fetch_add(1, Ordering::AcqRel);
+            eprint!(
+                "\rScanlines remaining: {}  ",
+                self.vsize - progress.load(Ordering::Relaxed) as usize
+            );
+            (0..self.hsize - 1).for_each(|x| {
                 let mut color = Color::black();
                 for _ in 0..self.samples_pre_pixel {
                     let ray = self.ray_for_pixel(x, y);
                     color += world.color_at(&ray);
                 }
-                canvas
-                    .write_pixel(x, y, self.rescale_color_range(color))
-                    .unwrap();
-            }
+                rx.send(((x, y), self.rescale_color_range(color))).unwrap();
+            });
+        });
+
+        for _ in 0..((self.hsize - 1) * (self.vsize - 1)) {
+            let ((x, y), color) = tx.recv().unwrap();
+            canvas.write_pixel(x, y, color).unwrap();
         }
 
         canvas

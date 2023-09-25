@@ -91,6 +91,9 @@ impl Shape for Sphere {
     }
 }
 
+unsafe impl Send for Sphere {}
+unsafe impl Sync for Sphere {}
+
 #[cfg(test)]
 mod tests {
     use test_case::test_case;
