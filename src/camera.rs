@@ -1,8 +1,9 @@
 use crate::canvas::Canvas;
 use crate::matrix::Matrix4;
 use crate::ray::Ray;
-use crate::tuple::{Point, Vector};
+use crate::tuple::{Color, Point, Vector};
 use crate::world::World;
+use rand::Rng;
 use std::f32::consts::PI;
 
 #[derive(Debug)]
@@ -15,6 +16,8 @@ pub struct Camera {
     pub half_width: f32,
     pub half_height: f32,
 }
+
+const SAMPLES_PER_PIXEL: usize = 2;
 
 impl Camera {
     pub fn new(hsize: usize, vsize: usize, fov: f32) -> Self {
@@ -48,8 +51,8 @@ impl Camera {
     }
 
     fn ray_for_pixel(&self, px: usize, py: usize) -> Ray {
-        let xoffset = (px as f32 + 0.5) * self.pixel_size;
-        let yoffset = (py as f32 + 0.5) * self.pixel_size;
+        let xoffset = (px as f32 + 0.5 + rand::thread_rng().gen_range(-0.5..0.5)) * self.pixel_size;
+        let yoffset = (py as f32 + 0.5 + rand::thread_rng().gen_range(-0.5..0.5)) * self.pixel_size;
 
         let world_x = self.half_width - xoffset;
         let world_y = self.half_height - yoffset;
@@ -66,13 +69,28 @@ impl Camera {
         let mut canvas = Canvas::new(self.hsize, self.vsize);
         for y in 0..self.vsize - 1 {
             for x in 0..self.hsize - 1 {
-                let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(&ray);
-                canvas.write_pixel(x, y, color).unwrap();
+                let mut color = Color::new(0., 0., 0.);
+                for _ in 0..SAMPLES_PER_PIXEL {
+                    let ray = self.ray_for_pixel(x, y);
+                    color += world.color_at(&ray);
+                }
+                canvas
+                    .write_pixel(x, y, Self::rescale_color_range(color))
+                    .unwrap();
             }
         }
 
         canvas
+    }
+
+    fn rescale_color_range(color: Color) -> Color {
+        let scale = 1.0 / SAMPLES_PER_PIXEL as f32;
+        let scaled = color * scale;
+        Color::new(
+            scaled.r.clamp(0., 1.),
+            scaled.g.clamp(0., 1.),
+            scaled.b.clamp(0., 1.),
+        )
     }
 }
 
