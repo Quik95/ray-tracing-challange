@@ -10,6 +10,7 @@ use crate::tuple::{Point, Vector};
 pub struct Sphere {
     pub id: Uuid,
     pub transform: Matrix4,
+    inverse_transform: Matrix4,
     pub material: Material,
 }
 
@@ -37,6 +38,7 @@ impl Sphere {
 
     pub fn set_transform(&'static mut self, transform: &Matrix4) -> &'static mut Self {
         self.transform = *transform * self.transform;
+        self.inverse_transform = self.transform.inverse();
         self
     }
 }
@@ -46,6 +48,7 @@ impl Default for Sphere {
         Self {
             id: Uuid::new_v4(),
             transform: Matrix4::identity(),
+            inverse_transform: Matrix4::identity().inverse(),
             material: Material::default(),
         }
     }
@@ -84,6 +87,10 @@ impl Shape for Sphere {
 
     fn get_transform(&self) -> &Matrix4 {
         &self.transform
+    }
+
+    fn get_inverse_transform(&self) -> &Matrix4 {
+        &self.inverse_transform
     }
 
     fn get_id(&self) -> &Uuid {

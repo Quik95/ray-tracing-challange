@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub struct Plane {
     id: Uuid,
     transform: Matrix4,
+    inverse_transform: Matrix4,
     material: Material,
 }
 
@@ -27,6 +28,7 @@ impl Plane {
 
     pub fn set_transform(&'static mut self, transform: Matrix4) -> &'static mut Self {
         self.transform = transform;
+        self.inverse_transform = self.transform.inverse();
         self
     }
 }
@@ -39,6 +41,7 @@ impl Default for Plane {
         Self {
             id: Uuid::new_v4(),
             transform: Matrix4::identity(),
+            inverse_transform: Matrix4::identity().inverse(),
             material: Material::default(),
         }
     }
@@ -63,6 +66,10 @@ impl Shape for Plane {
 
     fn get_transform(&self) -> &Matrix4 {
         &self.transform
+    }
+
+    fn get_inverse_transform(&self) -> &Matrix4 {
+        &self.inverse_transform
     }
 
     fn get_id(&self) -> &Uuid {

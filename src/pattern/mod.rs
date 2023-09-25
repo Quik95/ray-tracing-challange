@@ -16,7 +16,7 @@ pub use stripe::Stripe;
 
 pub trait Pattern {
     fn color_object(&self, object: &dyn Shape, point: &Point) -> Color {
-        let object_point = object.get_transform().inverse() * point;
+        let object_point = object.get_inverse_transform() * point;
         let pattern_point = self.get_transform().inverse() * object_point;
         self.color_at(&pattern_point)
     }

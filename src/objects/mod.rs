@@ -16,19 +16,20 @@ use crate::tuple::{Point, Vector, EPSILON};
 pub trait Shape: Send + Sync {
     fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
     fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
-        let ray = ray.transform(&self.get_transform().inverse());
+        let ray = ray.transform(self.get_inverse_transform());
         self.local_intersect(&ray)
     }
     fn local_normal(&self, p: &Point) -> Vector;
     fn get_normal(&self, point: &Point) -> Vector {
-        let local_point = self.get_transform().inverse() * point;
+        let local_point = self.get_inverse_transform() * point;
         let local_normal = self.local_normal(&local_point);
-        let world_normal = self.get_transform().inverse().transpose() * local_normal;
+        let world_normal = self.get_inverse_transform().transpose() * local_normal;
 
         world_normal.normalize()
     }
     fn get_material(&self) -> &Material;
     fn get_transform(&self) -> &Matrix4;
+    fn get_inverse_transform(&self) -> &Matrix4;
     fn get_id(&self) -> &Uuid;
 }
 
