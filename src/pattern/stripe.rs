@@ -41,9 +41,9 @@ impl Pattern for Stripe {
 #[cfg(test)]
 mod tests {
     use crate::matrix::Matrix4;
-    use crate::objects::Sphere;
     use crate::pattern::stripe::Stripe;
     use crate::pattern::Pattern;
+    use crate::shape::Sphere;
     use crate::tuple::{Color, Point, Vector};
 
     #[test]

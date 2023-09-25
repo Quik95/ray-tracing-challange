@@ -6,6 +6,7 @@ pub use sphere::Sphere;
 
 use crate::ray::Ray;
 use derive_more::Constructor;
+use smallvec::SmallVec;
 use std::cmp::Ordering;
 use uuid::Uuid;
 
@@ -14,8 +15,8 @@ use crate::matrix::Matrix4;
 use crate::tuple::{Point, Vector, EPSILON};
 
 pub trait Shape: Send + Sync {
-    fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>>;
-    fn intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
+    fn local_intersect(&'static self, ray: &Ray) -> Option<SmallVec<[Intersection; 8]>>;
+    fn intersect(&'static self, ray: &Ray) -> Option<SmallVec<[Intersection; 8]>> {
         let ray = ray.transform(self.get_inverse_transform());
         self.local_intersect(&ray)
     }
@@ -98,8 +99,8 @@ pub struct PrecomputedHit {
 #[cfg(test)]
 mod tests {
     use crate::matrix::Matrix4;
-    use crate::objects::{Intersection, Sphere};
     use crate::ray::Ray;
+    use crate::shape::{Intersection, Sphere};
     use crate::tuple::{Point, Vector, EPSILON};
 
     #[test]

@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::matrix::Matrix4;
-use crate::objects::{Plane, Shape, Sphere};
+use crate::shape::{Plane, Shape, Sphere};
 
 use crate::tuple::{Color, Point, Vector};
 
@@ -17,9 +17,9 @@ mod canvas;
 mod light;
 mod material;
 mod matrix;
-mod objects;
 mod pattern;
 mod ray;
+mod shape;
 mod tuple;
 mod world;
 

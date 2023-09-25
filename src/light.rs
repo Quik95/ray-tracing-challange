@@ -1,5 +1,5 @@
 use crate::material::Material;
-use crate::objects::Shape;
+use crate::shape::Shape;
 use crate::tuple::{Color, Point, Vector};
 use derive_more::Constructor;
 
@@ -59,8 +59,8 @@ impl PointLight {
 mod tests {
     use crate::light::PointLight;
     use crate::material::Material;
-    use crate::objects::Sphere;
     use crate::pattern::Stripe;
+    use crate::shape::Sphere;
     use crate::tuple::{Color, Point, Vector};
     use test_case::test_case;
 

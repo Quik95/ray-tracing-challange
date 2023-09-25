@@ -1,8 +1,8 @@
 use crate::light::PointLight;
 use crate::material::Material;
 use crate::matrix::Matrix4;
-use crate::objects::{Intersection, PrecomputedHit, Shape, Sphere};
 use crate::ray::Ray;
+use crate::shape::{Intersection, PrecomputedHit, Shape, Sphere};
 use crate::tuple::{Color, Point, Vector};
 use derive_more::Constructor;
 use itertools::Itertools;
@@ -112,8 +112,8 @@ mod tests {
     use crate::light::PointLight;
     use crate::material::Material;
     use crate::matrix::Matrix4;
-    use crate::objects::{Intersection, Shape, Sphere};
     use crate::ray::Ray;
+    use crate::shape::{Intersection, Shape, Sphere};
     use crate::tuple::{Color, Point, Vector};
     use crate::world::World;
     use nalgebra::matrix;
@@ -142,7 +142,7 @@ mod tests {
             crate::tuple::Vector::new(0., 0., 1.),
         );
         let shape = w.objects[0];
-        let i = crate::objects::Intersection::new(4., shape);
+        let i = crate::shape::Intersection::new(4., shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
         assert_eq!(c, crate::tuple::Color::new(0.38066, 0.47582, 0.28549));
@@ -162,7 +162,7 @@ mod tests {
             crate::tuple::Vector::new(0., 0., 1.),
         );
         let shape = w.objects[1];
-        let i = crate::objects::Intersection::new(0.5, shape);
+        let i = crate::shape::Intersection::new(0.5, shape);
         let comps = i.precompute_hit(&r);
         let c = w.shade_hit(&comps);
         assert_eq!(c, crate::tuple::Color::new(0.90498, 0.90498, 0.90498));

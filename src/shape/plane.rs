@@ -1,9 +1,10 @@
 use crate::material::Material;
 use crate::matrix::Matrix4;
-use crate::objects::{Intersection, Shape};
 use crate::ray::Ray;
+use crate::shape::{Intersection, Shape};
 use crate::tuple::{Point, Vector, EPSILON};
 use derive_more::Constructor;
+use smallvec::{smallvec, SmallVec};
 use uuid::Uuid;
 
 #[derive(Debug, Constructor)]
@@ -48,12 +49,12 @@ impl Default for Plane {
 }
 
 impl Shape for Plane {
-    fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
+    fn local_intersect(&'static self, ray: &Ray) -> Option<SmallVec<[Intersection; 8]>> {
         if ray.direction.y.abs() < EPSILON {
             return None;
         }
         let t = -ray.origin.y / ray.direction.y;
-        Some(vec![Intersection::new(t, self)])
+        Some(smallvec![Intersection::new(t, self)])
     }
 
     fn local_normal(&self, _p: &Point) -> Vector {
@@ -79,9 +80,9 @@ impl Shape for Plane {
 
 #[cfg(test)]
 mod tests {
-    use crate::objects::plane::Plane;
-    use crate::objects::Shape;
     use crate::ray::Ray;
+    use crate::shape::plane::Plane;
+    use crate::shape::Shape;
     use crate::tuple::{Point, Vector};
     use test_case::test_case;
 

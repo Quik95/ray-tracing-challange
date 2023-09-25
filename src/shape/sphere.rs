@@ -1,9 +1,10 @@
 use crate::material::Material;
+use smallvec::{smallvec, SmallVec};
 use uuid::Uuid;
 
 use crate::matrix::Matrix4;
-use crate::objects::{Intersection, Shape};
 use crate::ray::Ray;
+use crate::shape::{Intersection, Shape};
 use crate::tuple::{Point, Vector};
 
 #[derive(Debug)]
@@ -55,7 +56,7 @@ impl Default for Sphere {
 }
 
 impl Shape for Sphere {
-    fn local_intersect(&'static self, ray: &Ray) -> Option<Vec<Intersection>> {
+    fn local_intersect(&'static self, ray: &Ray) -> Option<SmallVec<[Intersection; 8]>> {
         let origin = Point::zero();
         let radius = 1.0_f32;
         let sphere_to_ray = ray.origin - origin;
@@ -71,7 +72,7 @@ impl Shape for Sphere {
         let t1 = (-b - discriminant.sqrt()) / (2. * a);
         let t2 = (-b + discriminant.sqrt()) / (2. * a);
 
-        Some(vec![
+        Some(smallvec![
             Intersection::new(t1, self),
             Intersection::new(t2, self),
         ])
@@ -106,8 +107,8 @@ mod tests {
     use test_case::test_case;
 
     use crate::matrix::Matrix4;
-    use crate::objects::{Shape, Sphere};
     use crate::ray::Ray;
+    use crate::shape::{Shape, Sphere};
     use crate::tuple::{Point, Vector};
 
     #[test]
