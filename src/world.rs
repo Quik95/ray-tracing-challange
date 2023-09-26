@@ -117,6 +117,7 @@ mod tests {
     use crate::tuple::{Color, Point, Vector};
     use crate::world::World;
     use nalgebra::matrix;
+    use pretty_assertions::assert_eq;
     use test_case::test_case;
 
     #[test]

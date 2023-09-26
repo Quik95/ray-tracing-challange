@@ -84,6 +84,7 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use crate::canvas::Canvas;
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn creating_canvas() {

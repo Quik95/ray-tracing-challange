@@ -103,6 +103,8 @@ mod tests {
     use crate::shape::{Intersection, Sphere};
     use crate::tuple::{Point, Vector, EPSILON};
 
+    use pretty_assertions::assert_eq;
+
     #[test]
     pub fn when_all_t_positive() {
         let s = Sphere::static_default();

@@ -45,6 +45,7 @@ mod tests {
     use crate::pattern::Pattern;
     use crate::shape::Sphere;
     use crate::tuple::{Color, Point, Vector};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn stripe_pattern_is_constant_in_y() {

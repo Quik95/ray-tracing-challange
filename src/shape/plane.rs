@@ -84,6 +84,7 @@ mod tests {
     use crate::shape::plane::Plane;
     use crate::shape::Shape;
     use crate::tuple::{Point, Vector};
+    use pretty_assertions::assert_eq;
     use test_case::test_case;
 
     #[test_case(Point::new(0., 0., 0.))]

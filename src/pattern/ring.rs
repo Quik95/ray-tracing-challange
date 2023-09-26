@@ -41,6 +41,7 @@ impl Pattern for Ring {
 mod tests {
     use crate::pattern::{Pattern, Ring};
     use crate::tuple::{Color, Point};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn ring_should_extend_in_both_x_and_z() {

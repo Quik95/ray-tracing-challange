@@ -44,6 +44,7 @@ impl Pattern for LinearGradient {
 mod tests {
     use crate::pattern::{LinearGradient, Pattern};
     use crate::tuple::{Color, Point};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn linearly_interpolates_between_colors() {

@@ -24,6 +24,7 @@ mod tests {
     use crate::matrix::Matrix4;
     use crate::ray::Ray;
     use crate::tuple::{Point, Vector};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn creating_ray() {

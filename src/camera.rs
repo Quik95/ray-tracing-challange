@@ -132,6 +132,7 @@ mod tests {
     use crate::matrix::Matrix4;
     use crate::tuple::{Color, Point, Vector};
     use crate::world::World;
+    use pretty_assertions::assert_eq;
     use std::f32::consts::PI;
 
     #[test]

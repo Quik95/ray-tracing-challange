@@ -259,6 +259,7 @@ impl Mul<Self> for Color {
 #[cfg(test)]
 mod tests {
     use crate::tuple::{approx_eq, Color, Point, Vector};
+    use pretty_assertions::assert_eq;
     use test_case::test_case;
 
     #[test]

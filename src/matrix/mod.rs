@@ -215,6 +215,7 @@ mod tests {
     use crate::matrix::Matrix4;
     use crate::tuple::{Point, Vector};
     use nalgebra::matrix;
+    use pretty_assertions::assert_eq;
     use std::f32::consts::PI;
     use test_case::test_case;
 

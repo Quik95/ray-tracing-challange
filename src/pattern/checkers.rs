@@ -41,6 +41,7 @@ impl Pattern for Checkers {
 mod tests {
     use crate::pattern::{Checkers, Pattern};
     use crate::tuple::{Color, Point};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn checkers_should_repeat_in_x() {

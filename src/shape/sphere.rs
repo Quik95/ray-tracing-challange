@@ -110,6 +110,7 @@ mod tests {
     use crate::ray::Ray;
     use crate::shape::{Shape, Sphere};
     use crate::tuple::{Point, Vector};
+    use pretty_assertions::assert_eq;
 
     #[test]
     pub fn ray_intersects_sphere_at_two_points() {

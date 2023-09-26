@@ -62,6 +62,7 @@ mod tests {
     use crate::pattern::Stripe;
     use crate::shape::Sphere;
     use crate::tuple::{Color, Point, Vector};
+    use pretty_assertions::assert_eq;
     use test_case::test_case;
 
     #[test_case(
