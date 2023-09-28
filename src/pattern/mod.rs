@@ -30,3 +30,31 @@ impl Debug for dyn Pattern {
         write!(f, "Pattern")
     }
 }
+
+#[cfg(test)]
+#[derive(Debug, Default)]
+pub struct TestPattern {
+    pub transform: Matrix4,
+}
+
+#[cfg(test)]
+impl TestPattern {
+    pub fn new() -> Box<Self> {
+        Box::<TestPattern>::default()
+    }
+}
+
+#[cfg(test)]
+impl Pattern for TestPattern {
+    fn color_at(&self, point: &Point) -> Color {
+        Color::new(point.x, point.y, point.z)
+    }
+
+    fn get_transform(&self) -> &Matrix4 {
+        &self.transform
+    }
+
+    fn set_transform(&mut self, transform: &Matrix4) {
+        self.transform = *transform;
+    }
+}

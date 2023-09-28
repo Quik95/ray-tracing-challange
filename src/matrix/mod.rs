@@ -6,6 +6,12 @@ use nalgebra::{matrix, Point4, Vector4};
 #[derive(Copy, Clone, Debug)]
 pub struct Matrix4(nalgebra::Matrix4<f32>);
 
+impl Default for Matrix4 {
+    fn default() -> Self {
+        Self::identity()
+    }
+}
+
 impl Eq for Matrix4 {}
 
 impl PartialEq for Matrix4 {

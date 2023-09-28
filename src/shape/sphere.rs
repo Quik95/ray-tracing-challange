@@ -37,6 +37,14 @@ impl Sphere {
         leaked
     }
 
+    pub fn static_glass_sphere() -> &'static mut Self {
+        let mut s = Box::<Self>::default();
+        s.material.transparency = 1.0;
+        s.material.refractive_index = 1.5;
+
+        Box::leak(s)
+    }
+
     pub fn set_transform(&'static mut self, transform: &Matrix4) -> &'static mut Self {
         self.transform = *transform * self.transform;
         self.inverse_transform = self.transform.inverse();

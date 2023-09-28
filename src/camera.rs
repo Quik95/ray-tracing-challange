@@ -23,6 +23,7 @@ pub struct Camera {
 }
 
 const SAMPLES_PER_PIXEL: usize = 10;
+const MAX_REFLECTION_RECURSION_DEPTH: i32 = 5;
 
 impl Camera {
     pub fn new(hsize: usize, vsize: usize, fov: f32) -> Self {
@@ -95,7 +96,7 @@ impl Camera {
                 let mut color = Color::black();
                 for _ in 0..self.samples_pre_pixel {
                     let ray = self.ray_for_pixel(x, y);
-                    color += world.color_at(&ray);
+                    color += world.color_at(&ray, MAX_REFLECTION_RECURSION_DEPTH);
                 }
                 rx.send(((x, y), self.rescale_color_range(color))).unwrap();
             });

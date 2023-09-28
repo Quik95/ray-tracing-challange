@@ -33,24 +33,28 @@ fn main() -> color_eyre::Result<()> {
     };
     let floor: &'static dyn Shape = Plane::default_with_material(Material {
         pattern: Some(pattern::Checkers::new(
-            Color::new(1., 0., 0.),
-            Color::black(),
+            Color::new(0., 1., 0.),
+            Color::new(1., 0.5, 0.),
         )),
+        reflective: 0.4,
+        transparency: 0.4,
         ..Default::default()
     });
-    let _backdrop: &'static dyn Shape = Plane::default_with_material(Material {
-        color: Color::new(1., 0.9, 0.9),
-        specular: 0.0,
-        pattern: Some(pattern::LinearGradient::new(
-            Color::new(1.0, 0.0, 0.1),
-            Color::new(0.0, 1.0, 0.1),
-        )),
+    let mut backdrop_pattern =
+        pattern::Checkers::new(Color::new(0.5, 0.5, 0.5), Color::new(0.75, 0.75, 0.75));
+    backdrop_pattern.set_transform(
+        &Matrix4::identity()
+            .rotate_x(PI / 2.)
+            .scale(&Vector::new(3., 3., 3.)),
+    );
+    let backdrop: &'static dyn Shape = Plane::default_with_material(Material {
+        pattern: Some(backdrop_pattern),
         ..Default::default()
     })
     .set_transform(
         Matrix4::identity()
             .rotate_x(PI / 2.)
-            .translate(&Vector::new(0., 0., 10.)),
+            .translate(&Vector::new(0., 0., 100.)),
     );
 
     let mut middle_pattern =
@@ -61,22 +65,16 @@ fn main() -> color_eyre::Result<()> {
             .scale(&Vector::new(0.1, 0.1, 0.1)),
     );
     let middle: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::new(0.1, 1., 0.5),
-        diffuse: 0.7,
-        specular: 0.3,
-        pattern: Some(middle_pattern),
+        reflective: 0.95,
+        transparency: 0.95,
         ..Default::default()
     })
     .set_transform(&Matrix4::identity().translate(&Vector::new(-0.5, 1., 0.5)));
 
     let right: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::new(0.5, 1., 0.1),
-        diffuse: 0.7,
-        specular: 0.3,
-        pattern: Some(pattern::LinearGradient::new(
-            Color::new(1., 0., 0.),
-            Color::new(0., 0., 1.),
-        )),
+        color: Color::black(),
+
+        reflective: 1.0,
         ..Default::default()
     })
     .set_transform(
@@ -86,10 +84,11 @@ fn main() -> color_eyre::Result<()> {
     );
 
     let left: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::new(1., 0.8, 0.1),
-        diffuse: 0.7,
-        specular: 0.3,
-        pattern: None,
+        color: Color::new(1.0, 0.412, 0.706),
+        diffuse: 0.8,
+        ambient: 0.1,
+        reflective: 1.0,
+        transparency: 0.5,
         ..Default::default()
     })
     .set_transform(
@@ -98,7 +97,7 @@ fn main() -> color_eyre::Result<()> {
             .translate(&Vector::new(-1.5, 0.33, -0.75)),
     );
 
-    let left2: &'static dyn Shape = Sphere::default_with_material(Material {
+    let _left2: &'static dyn Shape = Sphere::default_with_material(Material {
         color: Color::new(0.420, 0.69, 0.2137),
         diffuse: 1.0,
         specular: 0.2,
@@ -110,8 +109,8 @@ fn main() -> color_eyre::Result<()> {
             .translate(&Vector::new(-0.5, 0., -1.75)),
     );
 
-    let light_source = PointLight::new(Point::new(-10., 10., -10.), Color::new(1., 1., 1.));
-    let world = world::World::new(light_source, vec![floor, middle, right, left, left2]);
+    let light_source = PointLight::new(Point::new(-10., 1000., -1000.), Color::new(1., 1., 1.));
+    let world = world::World::new(light_source, vec![floor, backdrop, middle, left, right]);
 
     let mut camera = Camera::new(1000, 1000, PI / 3.);
     camera.set_transform(
