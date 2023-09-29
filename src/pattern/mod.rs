@@ -40,7 +40,7 @@ pub struct TestPattern {
 #[cfg(test)]
 impl TestPattern {
     pub fn new() -> Box<Self> {
-        Box::<TestPattern>::default()
+        Box::<Self>::default()
     }
 }
 

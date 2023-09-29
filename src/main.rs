@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::matrix::Matrix4;
-use crate::shape::{Plane, Shape, Sphere};
+use crate::shape::{Cube, Plane, Shape};
 
 use crate::tuple::{Color, Point, Vector};
 
@@ -57,64 +57,33 @@ fn main() -> color_eyre::Result<()> {
             .translate(&Vector::new(0., 0., 100.)),
     );
 
-    let mut middle_pattern =
-        pattern::Ring::new(Color::new(1.0, 0.0, 0.1), Color::new(0.0, 1.0, 0.1));
-    middle_pattern.set_transform(
-        &Matrix4::identity()
-            .rotate_x(PI / 2.)
-            .scale(&Vector::new(0.1, 0.1, 0.1)),
-    );
-    let middle: &'static dyn Shape = Sphere::default_with_material(Material {
-        reflective: 0.95,
-        transparency: 0.95,
-        ..Default::default()
-    })
-    .set_transform(&Matrix4::identity().translate(&Vector::new(-0.5, 1., 0.5)));
-
-    let right: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::black(),
-
+    let c1 = Cube::default_with_material(Material {
         reflective: 1.0,
+        color: Color::new(0.5, 0.74, 0.12),
         ..Default::default()
-    })
-    .set_transform(
-        &Matrix4::identity()
-            .scale(&Vector::new(0.5, 0.5, 0.5))
-            .translate(&Vector::new(1.5, 0.5, -0.5)),
-    );
+    });
+    c1.set_transform(Matrix4::identity().translate(&Vector::new(1.5, 1., 0.)));
 
-    let left: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::new(1.0, 0.412, 0.706),
-        diffuse: 0.8,
-        ambient: 0.1,
+    let c2 = Cube::default_with_material(Material {
         reflective: 1.0,
-        transparency: 0.5,
+        color: Color::new(0.234, 0.315, 0.4168),
         ..Default::default()
-    })
-    .set_transform(
-        &Matrix4::identity()
-            .scale(&Vector::new(0.33, 0.33, 0.33))
-            .translate(&Vector::new(-1.5, 0.33, -0.75)),
-    );
+    });
+    c2.set_transform(Matrix4::identity().translate(&Vector::new(-1.5, 1., 0.)));
 
-    let _left2: &'static dyn Shape = Sphere::default_with_material(Material {
-        color: Color::new(0.420, 0.69, 0.2137),
-        diffuse: 1.0,
-        specular: 0.2,
+    let c3 = Cube::default_with_material(Material {
+        reflective: 1.0,
+        color: Color::new(0.3168, 0.6843, 0.354_318),
         ..Default::default()
-    })
-    .set_transform(
-        &Matrix4::identity()
-            .scale(&Vector::new(0.33, 0.33, 0.33))
-            .translate(&Vector::new(-0.5, 0., -1.75)),
-    );
+    });
+    c3.set_transform(Matrix4::identity().translate(&Vector::new(0.0, 3.5, 0.)));
 
     let light_source = PointLight::new(Point::new(-10., 1000., -1000.), Color::new(1., 1., 1.));
-    let world = world::World::new(light_source, vec![floor, backdrop, middle, left, right]);
+    let world = world::World::new(light_source, vec![floor, backdrop, c1, c2, c3]);
 
     let mut camera = Camera::new(1000, 1000, PI / 3.);
     camera.set_transform(
-        Point::new(0., 1.5, -5.),
+        Point::new(0., 1.5, -10.),
         Point::new(0., 1., 0.),
         Vector::new(0., 1., 0.),
     );

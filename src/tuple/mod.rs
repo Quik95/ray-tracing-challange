@@ -2,12 +2,23 @@ use derive_more::{
     Add, AddAssign, Constructor, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign,
 };
 use nalgebra::Point4;
+use std::cmp::Ordering;
 use std::ops::{Add, Mul, Sub};
 
 pub const EPSILON: f32 = 0.00001;
 
 pub fn approx_eq(a: f32, b: f32) -> bool {
     (a - b).abs() < EPSILON
+}
+
+pub fn approx_cmp(a: f32, b: f32) -> Ordering {
+    if (a - b).abs() < EPSILON {
+        Ordering::Equal
+    } else if (b - a) > EPSILON {
+        Ordering::Less
+    } else {
+        Ordering::Greater
+    }
 }
 
 #[derive(
