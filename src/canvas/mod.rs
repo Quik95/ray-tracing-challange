@@ -1,6 +1,11 @@
+use std::fs::File;
+use std::io::BufWriter;
+use std::path::Path;
+
 use crate::tuple::{Color, Point};
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
+use itertools::Itertools;
 
 pub struct Canvas {
     pub width: usize,
@@ -78,6 +83,26 @@ impl Canvas {
         ppm.push('\n');
 
         ppm
+    }
+
+    fn convert_to_png(&self) -> Vec<u8> {
+        self.pixels
+            .iter()
+            .flat_map(|p| [(p.r * 255.) as u8, (p.g * 255.) as u8, (p.b * 255.) as u8])
+            .collect_vec()
+    }
+
+    pub fn save_as_png(&self, path: &str) -> Result<()> {
+        let file = File::create(Path::new(path))?;
+        let w = BufWriter::new(file);
+        let mut encoder = png::Encoder::new(w, self.width as u32, self.height as u32);
+        encoder.set_color(png::ColorType::Rgb);
+
+        let mut writer = encoder.write_header()?;
+        let data = self.convert_to_png();
+        writer.write_image_data(&data)?;
+
+        Ok(())
     }
 }
 

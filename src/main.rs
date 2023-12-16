@@ -1,4 +1,10 @@
+use std::env::{self};
 use std::f32::consts::PI;
+
+
+
+
+use itertools::Itertools;
 
 use crate::matrix::Matrix4;
 use crate::shape::{Cube, Plane, Shape};
@@ -90,8 +96,8 @@ fn main() -> color_eyre::Result<()> {
 
     let canvas = camera.render(&world);
 
-    let ppm = canvas.convert_to_ppm();
-    dump_to_stdout(ppm.as_bytes())?;
+    let args = env::args().collect_vec();
+    canvas.save_as_png(args.get(1).unwrap_or(&"./tracer.png".to_owned()))?;
 
     Ok(())
 }
