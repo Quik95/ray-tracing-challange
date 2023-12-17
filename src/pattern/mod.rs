@@ -10,8 +10,13 @@ use crate::matrix::Matrix4;
 use crate::shape::Shape;
 
 pub use checkers::Checkers;
+
+// workaround to prevent clippy from breaking the tests
+#[allow(unused_imports)]
 pub use gradient::LinearGradient;
+#[allow(unused_imports)]
 pub use ring::Ring;
+#[allow(unused_imports)]
 pub use stripe::Stripe;
 
 pub trait Pattern {

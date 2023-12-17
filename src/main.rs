@@ -1,9 +1,6 @@
 use std::env::{self};
 use std::f32::consts::PI;
 
-
-
-
 use itertools::Itertools;
 
 use crate::matrix::Matrix4;
@@ -15,8 +12,6 @@ use crate::camera::Camera;
 use crate::light::PointLight;
 use crate::material::Material;
 use crate::pattern::Pattern;
-use std::io;
-use std::io::{BufWriter, Write};
 
 mod camera;
 mod canvas;
@@ -99,12 +94,5 @@ fn main() -> color_eyre::Result<()> {
     let args = env::args().collect_vec();
     canvas.save_as_png(args.get(1).unwrap_or(&"./tracer.png".to_owned()))?;
 
-    Ok(())
-}
-
-fn dump_to_stdout(data: &[u8]) -> color_eyre::Result<()> {
-    let mut writer = BufWriter::new(io::stdout());
-    writer.write_all(data)?;
-    writer.flush()?;
     Ok(())
 }

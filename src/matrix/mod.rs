@@ -148,7 +148,7 @@ impl Matrix4 {
 
     pub fn rotate_y(self, angle: f32) -> Self {
         self.rotate(
-           nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.)),
+            nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.)),
             angle,
         )
     }
