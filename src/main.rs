@@ -44,7 +44,7 @@ fn main() -> color_eyre::Result<()> {
     let mut backdrop_pattern =
         pattern::Checkers::new(Color::new(0.5, 0.5, 0.5), Color::new(0.75, 0.75, 0.75));
     backdrop_pattern.set_transform(
-        &Matrix4::identity()
+        Matrix4::identity()
             .rotate_x(PI / 2.)
             .scale(Vector::new(3., 3., 3.)),
     );

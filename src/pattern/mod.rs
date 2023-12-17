@@ -27,7 +27,7 @@ pub trait Pattern {
     }
     fn color_at(&self, point: &Point) -> Color;
     fn get_transform(&self) -> &Matrix4;
-    fn set_transform(&mut self, transform: &Matrix4);
+    fn set_transform(&mut self, transform: Matrix4);
 }
 
 impl Debug for dyn Pattern {
@@ -59,7 +59,7 @@ impl Pattern for TestPattern {
         &self.transform
     }
 
-    fn set_transform(&mut self, transform: &Matrix4) {
-        self.transform = *transform;
+    fn set_transform(&mut self, transform: Matrix4) {
+        self.transform = transform;
     }
 }

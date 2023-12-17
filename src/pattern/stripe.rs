@@ -33,8 +33,8 @@ impl Pattern for Stripe {
         &self.transform
     }
 
-    fn set_transform(&mut self, transform: &Matrix4) {
-        self.transform = *transform;
+    fn set_transform(&mut self, transform: Matrix4) {
+        self.transform = transform;
     }
 }
 
@@ -88,7 +88,7 @@ mod tests {
         let obj = Sphere::static_default();
         let pattern_transform = Matrix4::identity().scale(Vector::new(2., 2., 2.));
         let mut pattern = Stripe::new(Color::white(), Color::black());
-        pattern.set_transform(&pattern_transform);
+        pattern.set_transform(pattern_transform);
         let c = pattern.color_object(obj, &Point::new(1.5, 0., 0.));
         assert_eq!(c, Color::white());
     }
@@ -98,7 +98,7 @@ mod tests {
         let obj = Sphere::static_default()
             .set_transform(Matrix4::identity().scale(Vector::new(2., 2., 2.)));
         let mut pattern = Stripe::new(Color::white(), Color::black());
-        pattern.set_transform(&Matrix4::identity().translate(Vector::new(0.5, 0., 0.)));
+        pattern.set_transform(Matrix4::identity().translate(Vector::new(0.5, 0., 0.)));
         let c = pattern.color_object(obj, &Point::new(2.5, 0., 0.));
         assert_eq!(c, Color::white());
     }

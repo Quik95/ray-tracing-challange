@@ -32,8 +32,8 @@ impl Pattern for Ring {
         &self.transform
     }
 
-    fn set_transform(&mut self, transform: &Matrix4) {
-        self.transform = *transform;
+    fn set_transform(&mut self, transform: Matrix4) {
+        self.transform = transform;
     }
 }
 
