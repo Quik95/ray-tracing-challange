@@ -45,8 +45,8 @@ impl Sphere {
         Box::leak(s)
     }
 
-    pub fn set_transform(&'static mut self, transform: &Matrix4) -> &'static mut Self {
-        self.transform = *transform * self.transform;
+    pub fn set_transform(&'static mut self, transform: Matrix4) -> &'static mut Self {
+        self.transform = transform * self.transform;
         self.inverse_transform = self.transform.inverse();
         self
     }
@@ -168,7 +168,7 @@ mod tests {
     pub fn changing_the_sphere_transform() {
         let s = Sphere::static_default();
         let t = Matrix4::identity().translate(Vector::new(2., 3., 4.));
-        let s2 = s.set_transform(&t);
+        let s2 = s.set_transform(t);
         assert_eq!(s2.transform, t);
     }
 
@@ -176,7 +176,7 @@ mod tests {
     pub fn intersect_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
-            .set_transform(&Matrix4::identity().scale(Vector::new(2., 2., 2.)));
+            .set_transform(Matrix4::identity().scale(Vector::new(2., 2., 2.)));
         let intersects = s.intersect(&r).unwrap();
         assert_eq!(intersects[0].t, 3.);
         assert_eq!(intersects[1].t, 7.);
@@ -186,7 +186,7 @@ mod tests {
     pub fn intersect_translated_ray_with_sphere() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_default()
-            .set_transform(&Matrix4::identity().translate(Vector::new(5., 0., 0.)));
+            .set_transform(Matrix4::identity().translate(Vector::new(5., 0., 0.)));
         let intersects = s.intersect(&r);
         assert!(intersects.is_none());
     }
@@ -222,7 +222,7 @@ mod tests {
     #[test]
     pub fn normal_of_translated_sphere() {
         let s = Sphere::static_default()
-            .set_transform(&Matrix4::identity().translate(Vector::new(0., 1., 0.)));
+            .set_transform(Matrix4::identity().translate(Vector::new(0., 1., 0.)));
         let n = s.get_normal(&Point::new(0., 1.70711, -0.70711));
         assert_eq!(n, Vector::new(0., 0.70711, -0.70711));
     }
@@ -230,7 +230,7 @@ mod tests {
     #[test]
     pub fn normal_of_transformed_sphere() {
         let s = Sphere::static_default().set_transform(
-            &Matrix4::identity()
+            Matrix4::identity()
                 .rotate_z(std::f32::consts::PI / 5.)
                 .scale(Vector::new(1., 0.5, 1.)),
         );

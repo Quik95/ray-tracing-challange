@@ -23,7 +23,7 @@ impl Default for World {
             ..Default::default()
         });
         let s2 = Sphere::static_default()
-            .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
+            .set_transform(Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
 
         Self {
             light_source: PointLight::new(
@@ -250,7 +250,7 @@ mod tests {
             ambient: 1.0,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
+        .set_transform(Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
 
         let w = World {
             objects: vec![s1, s2],
@@ -320,7 +320,7 @@ mod tests {
     pub fn shade_hit_in_shadow() {
         let s1 = Sphere::static_default();
         let s2 = Sphere::static_default()
-            .set_transform(&Matrix4::identity().translate(Vector::new(0., 0., 10.)));
+            .set_transform(Matrix4::identity().translate(Vector::new(0., 0., 10.)));
         let light = PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.));
         let w = World {
             objects: vec![s1, s2],
@@ -345,7 +345,7 @@ mod tests {
             ambient: 1.0,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
+        .set_transform(Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
         let w = World {
             objects: vec![s1, s2],
             ..Default::default()
@@ -570,7 +570,7 @@ mod tests {
             ambient: 0.5,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
         let w = World {
             objects: vec![floor, ball],
             ..Default::default()
@@ -599,7 +599,7 @@ mod tests {
             ambient: 0.5,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
         let world = World {
             objects: vec![floor, sphere],
             ..Default::default()
