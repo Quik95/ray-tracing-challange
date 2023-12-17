@@ -118,7 +118,7 @@ impl Matrix4 {
         Self(nalgebra::Matrix4::identity())
     }
 
-    pub fn translate(self, translation: &Vector) -> Self {
+    pub fn translate(self, translation: Vector) -> Self {
         let t = nalgebra::Matrix4::new_translation(&nalgebra::Vector3::new(
             translation.x,
             translation.y,
@@ -127,35 +127,35 @@ impl Matrix4 {
         Self(t * self.0)
     }
 
-    pub fn scale(self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: Vector) -> Self {
         let t = nalgebra::Matrix4::new_nonuniform_scaling(&nalgebra::Vector3::new(
             scale.x, scale.y, scale.z,
         ));
         Self(t * self.0)
     }
 
-    fn rotate(self, axis: &nalgebra::Unit<nalgebra::Vector3<f32>>, angle: f32) -> Self {
-        let t = nalgebra::Matrix4::from_axis_angle(axis, angle);
+    fn rotate(self, axis: nalgebra::Unit<nalgebra::Vector3<f32>>, angle: f32) -> Self {
+        let t = nalgebra::Matrix4::from_axis_angle(&axis, angle);
         Self(t * self.0)
     }
 
     pub fn rotate_x(self, angle: f32) -> Self {
         self.rotate(
-            &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(1., 0., 0.)),
+            nalgebra::Unit::new_normalize(nalgebra::Vector3::new(1., 0., 0.)),
             angle,
         )
     }
 
     pub fn rotate_y(self, angle: f32) -> Self {
         self.rotate(
-            &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.)),
+           nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 1., 0.)),
             angle,
         )
     }
 
     pub fn rotate_z(self, angle: f32) -> Self {
         self.rotate(
-            &nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 0., 1.)),
+            nalgebra::Unit::new_normalize(nalgebra::Vector3::new(0., 0., 1.)),
             angle,
         )
     }
@@ -181,19 +181,19 @@ impl Matrix4 {
 }
 
 impl Vector {
-    pub fn scale(self, scale: &Self) -> Self {
+    pub fn scale(self, scale: Self) -> Self {
         let t = Matrix4::identity().scale(scale);
         t * self
     }
 }
 
 impl Point {
-    pub fn translate(self, translation: &Vector) -> Self {
+    pub fn translate(self, translation: Vector) -> Self {
         let t = Matrix4::identity().translate(translation);
         t * self
     }
 
-    pub fn scale(self, scale: &Vector) -> Self {
+    pub fn scale(self, scale: Vector) -> Self {
         let t = Matrix4::identity().scale(scale);
         t * self
     }
@@ -377,13 +377,13 @@ mod tests {
 
     #[test]
     pub fn translate_point() {
-        let p = Point::new(5., -3., 2.).translate(&Vector::new(-3., 4., 5.));
+        let p = Point::new(5., -3., 2.).translate(Vector::new(-3., 4., 5.));
         assert_eq!(p, Point::new(2., 1., 7.));
     }
 
     #[test]
     pub fn inverse_undoes_translation() {
-        let t = Matrix4::identity().translate(&Vector::new(5., -3., 2.));
+        let t = Matrix4::identity().translate(Vector::new(5., -3., 2.));
         let p = Point::new(-3., 4., 5.);
         let res = t.inverse() * p;
         assert_eq!(res, Point::new(-8., 7., 3.));
@@ -391,13 +391,13 @@ mod tests {
 
     #[test]
     pub fn scaling_point() {
-        let p = Point::new(-4., 6., 8.).scale(&Vector::new(2., 3., 4.));
+        let p = Point::new(-4., 6., 8.).scale(Vector::new(2., 3., 4.));
         assert_eq!(p, Point::new(-8., 18., 32.));
     }
 
     #[test]
     pub fn inverse_undoes_scale_point() {
-        let t = Matrix4::identity().scale(&Vector::new(2., 3., 4.));
+        let t = Matrix4::identity().scale(Vector::new(2., 3., 4.));
         let p = Point::new(-4., 6., 8.);
         let res = t.inverse() * p;
         assert_eq!(res, Point::new(-2., 2., 2.));
@@ -405,13 +405,13 @@ mod tests {
 
     #[test]
     pub fn scaling_vector() {
-        let p = Vector::new(-4., 6., 8.).scale(&Vector::new(2., 3., 4.));
+        let p = Vector::new(-4., 6., 8.).scale(Vector::new(2., 3., 4.));
         assert_eq!(p, Vector::new(-8., 18., 32.));
     }
 
     #[test]
     pub fn inverse_undoes_scale_vector() {
-        let t = Matrix4::identity().scale(&Vector::new(2., 3., 4.));
+        let t = Matrix4::identity().scale(Vector::new(2., 3., 4.));
         let p = Vector::new(-4., 6., 8.);
         let res = t.inverse() * p;
         assert_eq!(res, Vector::new(-2., 2., 2.));
@@ -465,9 +465,9 @@ mod tests {
         let p = Point::new(1., 0., 1.);
         let A = p.rotate_x(PI / 2.);
         assert_eq!(A, Point::new(1., -1., 0.));
-        let B = A.scale(&Vector::new(5., 5., 5.));
+        let B = A.scale(Vector::new(5., 5., 5.));
         assert_eq!(B, Point::new(5., -5., 0.));
-        let C = B.translate(&Vector::new(10., 5., 7.));
+        let C = B.translate(Vector::new(10., 5., 7.));
         assert_eq!(C, Point::new(15., 0., 7.));
     }
 
@@ -476,8 +476,8 @@ mod tests {
         let p = Point::new(1., 0., 1.);
         let res = p
             .rotate_x(PI / 2.)
-            .scale(&Vector::new(5., 5., 5.))
-            .translate(&Vector::new(10., 5., 7.));
+            .scale(Vector::new(5., 5., 5.))
+            .translate(Vector::new(10., 5., 7.));
         assert_eq!(res, Point::new(15., 0., 7.));
     }
 }

@@ -252,7 +252,7 @@ mod tests {
     pub fn hit_should_offset_point() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let shape = Sphere::static_default()
-            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 0., 1.)));
+            .set_transform(&Matrix4::identity().translate(Vector::new(0., 0., 1.)));
         let i = Intersection::new(5., shape);
         let comps = i.precompute_hit(&r, &[i]);
         assert!(comps.over_point.z < -EPSILON / 2.);
@@ -263,7 +263,7 @@ mod tests {
     pub fn hit_refractive_should_offset_point() {
         let r = Ray::new(Point::new(0., 0., -5.), Vector::new(0., 0., 1.));
         let s = Sphere::static_glass_sphere()
-            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 0., 1.)));
+            .set_transform(&Matrix4::identity().translate(Vector::new(0., 0., 1.)));
         let i = Intersection::new(5., s);
         let comps = i.precompute_hit(&r, &[i]);
         assert!(comps.point.z < comps.under_point.z);

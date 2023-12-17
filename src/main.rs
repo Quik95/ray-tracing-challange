@@ -51,7 +51,7 @@ fn main() -> color_eyre::Result<()> {
     backdrop_pattern.set_transform(
         &Matrix4::identity()
             .rotate_x(PI / 2.)
-            .scale(&Vector::new(3., 3., 3.)),
+            .scale(Vector::new(3., 3., 3.)),
     );
     let backdrop: &'static dyn Shape = Plane::default_with_material(Material {
         pattern: Some(backdrop_pattern),
@@ -60,7 +60,7 @@ fn main() -> color_eyre::Result<()> {
     .set_transform(
         Matrix4::identity()
             .rotate_x(PI / 2.)
-            .translate(&Vector::new(0., 0., 100.)),
+            .translate(Vector::new(0., 0., 100.)),
     );
 
     let c1 = Cube::default_with_material(Material {
@@ -68,21 +68,21 @@ fn main() -> color_eyre::Result<()> {
         color: Color::new(0.5, 0.74, 0.12),
         ..Default::default()
     });
-    c1.set_transform(Matrix4::identity().translate(&Vector::new(1.5, 1., 0.)));
+    c1.set_transform(Matrix4::identity().translate(Vector::new(1.5, 1., 0.)));
 
     let c2 = Cube::default_with_material(Material {
         reflective: 1.0,
         color: Color::new(0.234, 0.315, 0.4168),
         ..Default::default()
     });
-    c2.set_transform(Matrix4::identity().translate(&Vector::new(-1.5, 1., 0.)));
+    c2.set_transform(Matrix4::identity().translate(Vector::new(-1.5, 1., 0.)));
 
     let c3 = Cube::default_with_material(Material {
         reflective: 1.0,
         color: Color::new(0.3168, 0.6843, 0.354_318),
         ..Default::default()
     });
-    c3.set_transform(Matrix4::identity().translate(&Vector::new(0.0, 3.5, 0.)));
+    c3.set_transform(Matrix4::identity().translate(Vector::new(0.0, 3.5, 0.)));
 
     let light_source = PointLight::new(Point::new(-10., 1000., -1000.), Color::new(1., 1., 1.));
     let world = world::World::new(light_source, vec![floor, backdrop, c1, c2, c3]);

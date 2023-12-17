@@ -77,7 +77,7 @@ mod tests {
     #[test]
     pub fn stripe_with_object_transformation() {
         let obj = Sphere::static_default()
-            .set_transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
+            .set_transform(&Matrix4::identity().scale(Vector::new(2., 2., 2.)));
         let pattern = Stripe::new(Color::white(), Color::black());
         let c = pattern.color_object(obj, &Point::new(1.5, 0., 0.));
         assert_eq!(c, Color::white());
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     pub fn stripe_with_pattern_transformation() {
         let obj = Sphere::static_default();
-        let pattern_transform = Matrix4::identity().scale(&Vector::new(2., 2., 2.));
+        let pattern_transform = Matrix4::identity().scale(Vector::new(2., 2., 2.));
         let mut pattern = Stripe::new(Color::white(), Color::black());
         pattern.set_transform(&pattern_transform);
         let c = pattern.color_object(obj, &Point::new(1.5, 0., 0.));
@@ -96,9 +96,9 @@ mod tests {
     #[test]
     pub fn stripe_with_both_transforms() {
         let obj = Sphere::static_default()
-            .set_transform(&Matrix4::identity().scale(&Vector::new(2., 2., 2.)));
+            .set_transform(&Matrix4::identity().scale(Vector::new(2., 2., 2.)));
         let mut pattern = Stripe::new(Color::white(), Color::black());
-        pattern.set_transform(&Matrix4::identity().translate(&Vector::new(0.5, 0., 0.)));
+        pattern.set_transform(&Matrix4::identity().translate(Vector::new(0.5, 0., 0.)));
         let c = pattern.color_object(obj, &Point::new(2.5, 0., 0.));
         assert_eq!(c, Color::white());
     }

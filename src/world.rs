@@ -23,7 +23,7 @@ impl Default for World {
             ..Default::default()
         });
         let s2 = Sphere::static_default()
-            .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
+            .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
 
         Self {
             light_source: PointLight::new(
@@ -151,7 +151,7 @@ impl Matrix4 {
         ]
         .into();
 
-        orientation * Self::identity().translate(&Vector::new(-from.x, -from.y, -from.z))
+        orientation * Self::identity().translate(Vector::new(-from.x, -from.y, -from.z))
     }
 }
 
@@ -250,7 +250,7 @@ mod tests {
             ambient: 1.0,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
+        .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
 
         let w = World {
             objects: vec![s1, s2],
@@ -278,7 +278,7 @@ mod tests {
         let to = Point::new(0., 0., 1.);
         let up = Vector::new(0., 1., 0.);
         let v = Matrix4::view_transform(from, to, up);
-        assert_eq!(v, Matrix4::identity().scale(&Vector::new(-1., 1., -1.)));
+        assert_eq!(v, Matrix4::identity().scale(Vector::new(-1., 1., -1.)));
     }
 
     #[test]
@@ -287,7 +287,7 @@ mod tests {
         let to = Point::new(0., 0., 0.);
         let up = Vector::new(0., 1., 0.);
         let v = Matrix4::view_transform(from, to, up);
-        assert_eq!(v, Matrix4::identity().translate(&Vector::new(0., 0., -8.)));
+        assert_eq!(v, Matrix4::identity().translate(Vector::new(0., 0., -8.)));
     }
 
     #[test]
@@ -320,7 +320,7 @@ mod tests {
     pub fn shade_hit_in_shadow() {
         let s1 = Sphere::static_default();
         let s2 = Sphere::static_default()
-            .set_transform(&Matrix4::identity().translate(&Vector::new(0., 0., 10.)));
+            .set_transform(&Matrix4::identity().translate(Vector::new(0., 0., 10.)));
         let light = PointLight::new(Point::new(0., 0., -10.), Color::new(1., 1., 1.));
         let w = World {
             objects: vec![s1, s2],
@@ -345,7 +345,7 @@ mod tests {
             ambient: 1.0,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().scale(&Vector::new(0.5, 0.5, 0.5)));
+        .set_transform(&Matrix4::identity().scale(Vector::new(0.5, 0.5, 0.5)));
         let w = World {
             objects: vec![s1, s2],
             ..Default::default()
@@ -363,7 +363,7 @@ mod tests {
             reflective: 0.5,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let mut w = World::default();
         w.objects.push(plane);
 
@@ -383,7 +383,7 @@ mod tests {
             reflective: 0.5,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let mut w = World::default();
         w.objects.push(plane);
 
@@ -403,12 +403,12 @@ mod tests {
             reflective: 1.0,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let upper = Plane::default_with_material(Material {
             reflective: 1.0,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., 1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., 1., 0.)));
         let w = World {
             objects: vec![lower, upper],
             light_source: PointLight::new(Point::new(0., 0., 0.), Color::new(1., 1., 1.)),
@@ -423,7 +423,7 @@ mod tests {
             reflective: 0.5,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let mut w = World::default();
         w.objects.push(plane);
         let r = Ray::new(
@@ -444,15 +444,15 @@ mod tests {
     #[test_case(5, 1.5, 1.0)]
     pub fn finding_n1_and_n2_at_various_intersections(index: usize, n1: f32, n2: f32) {
         let A = Sphere::static_glass_sphere();
-        A.transform = Matrix4::identity().scale(&Vector::new(2., 2., 2.));
+        A.transform = Matrix4::identity().scale(Vector::new(2., 2., 2.));
         A.material.refractive_index = 1.5;
 
         let B = Sphere::static_glass_sphere();
-        B.transform = Matrix4::identity().translate(&Vector::new(0., 0., -0.25));
+        B.transform = Matrix4::identity().translate(Vector::new(0., 0., -0.25));
         B.material.refractive_index = 2.0;
 
         let C = Sphere::static_glass_sphere();
-        C.transform = Matrix4::identity().translate(&Vector::new(0., 0., 0.25));
+        C.transform = Matrix4::identity().translate(Vector::new(0., 0., 0.25));
         C.material.refractive_index = 2.5;
 
         let ray = Ray::new(Point::new(0., 0., -4.), Vector::new(0., 0., 1.));
@@ -564,13 +564,13 @@ mod tests {
             refractive_index: 1.5,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let ball = Sphere::default_with_material(Material {
             color: Color::new(1., 0., 0.),
             ambient: 0.5,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().translate(&Vector::new(0., -3.5, -0.5)));
+        .set_transform(&Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
         let w = World {
             objects: vec![floor, ball],
             ..Default::default()
@@ -593,13 +593,13 @@ mod tests {
             reflective: 0.5,
             ..Default::default()
         })
-        .set_transform(Matrix4::identity().translate(&Vector::new(0., -1., 0.)));
+        .set_transform(Matrix4::identity().translate(Vector::new(0., -1., 0.)));
         let sphere = Sphere::default_with_material(Material {
             color: Color::new(1., 0., 0.),
             ambient: 0.5,
             ..Default::default()
         })
-        .set_transform(&Matrix4::identity().translate(&Vector::new(0., -3.5, -0.5)));
+        .set_transform(&Matrix4::identity().translate(Vector::new(0., -3.5, -0.5)));
         let world = World {
             objects: vec![floor, sphere],
             ..Default::default()

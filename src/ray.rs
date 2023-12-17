@@ -50,7 +50,7 @@ mod tests {
     #[test]
     pub fn translating_ray() {
         let r = Ray::new(Point::new(1., 2., 3.), Vector::new(0., 1., 0.));
-        let t = Matrix4::identity().translate(&Vector::new(3., 4., 5.));
+        let t = Matrix4::identity().translate(Vector::new(3., 4., 5.));
         let r2 = r.transform(&t);
         assert_eq!(r2.origin, Point::new(4., 6., 8.));
         assert_eq!(r2.direction, Vector::new(0., 1., 0.));
@@ -59,7 +59,7 @@ mod tests {
     #[test]
     pub fn scaling_ray() {
         let r = Ray::new(Point::new(1., 2., 3.), Vector::new(0., 1., 0.));
-        let t = Matrix4::identity().scale(&Vector::new(2., 3., 4.));
+        let t = Matrix4::identity().scale(Vector::new(2., 3., 4.));
         let r2 = r.transform(&t);
         assert_eq!(r2.origin, Point::new(2., 6., 12.));
         assert_eq!(r2.direction, Vector::new(0., 3., 0.));

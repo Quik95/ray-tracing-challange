@@ -174,7 +174,7 @@ mod tests {
         let mut c = Camera::new(201, 101, PI / 2.);
         c.samples_pre_pixel = 1;
         c.transform = Matrix4::identity()
-            .translate(&Vector::new(0., -2., 5.))
+            .translate(Vector::new(0., -2., 5.))
             .rotate_y(PI / 4.);
 
         let r = c.ray_for_pixel(100, 50);
