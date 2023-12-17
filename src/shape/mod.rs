@@ -1,10 +1,14 @@
 mod cube;
+mod cylinder;
 mod plane;
 mod sphere;
 
-pub use cube::Cube;
+pub use cylinder::Cylinder;
 pub use plane::Plane;
 pub use sphere::Sphere;
+
+#[allow(unused_imports)]
+pub use cube::Cube;
 
 use crate::ray::Ray;
 use derive_more::Constructor;

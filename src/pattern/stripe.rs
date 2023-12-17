@@ -7,7 +7,7 @@ use crate::tuple::{Color, Point};
 pub struct Stripe {
     pub even: Color,
     pub odd: Color,
-    transform: Matrix4,
+    pub transform: Matrix4,
 }
 
 impl Stripe {
